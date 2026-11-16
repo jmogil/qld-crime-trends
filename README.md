@@ -31,6 +31,20 @@ When ABS releases new population estimates, replace the two workbooks in `source
 
 Until then, offender-rate denominators for months after the latest 30 June estimate are extrapolated.
 
+## The Victims tab (about once a year)
+
+The Victims tab reads `data/victims.json`, which is built from the ABS release Recorded Crime – Victims.
+It is not part of the monthly refresh, because ABS publishes it once a year and does not offer it through an API.
+
+When ABS publishes a new release (https://www.abs.gov.au/statistics/people/crime-and-justice/recorded-crime-victims/latest-release):
+
+1. Move `victims-source/current/2. Victims of crime, states and territories (Tables 9 to 16).xlsx`
+   to `victims-source/earlier/victims_<its year>.xlsx` (for example `victims_2025.xlsx`). The age series from 2010 is assembled from one such file per year.
+2. Download the new data cubes 2, 3 and 5 into `victims-source/current/`, keeping the ABS file names.
+3. Make sure `source-files/3101053.xlsx` (Queensland population by age and sex) covers 30 June of the new year.
+4. Run `python build_victims.py --victims victims-source --erp source-files/3101053.xlsx --out data/victims.json`
+5. Commit and push. The build prints how closely its age-specific rates match those ABS publishes; it should be within about half a per cent.
+
 ## Running it yourself
 
     pip install pandas numpy openpyxl

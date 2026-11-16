@@ -156,6 +156,16 @@ tr.click:hover td{background:var(--accent-wash)}
 .kv dt{color:var(--ink-2)} .kv dd{margin:0;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
 .rank{max-height:330px;overflow:auto;border:1px solid var(--hair);border-radius:8px}
 .about{max-width:76ch}
+.hb{display:grid;gap:7px;margin-top:8px}
+.hb-row{display:grid;grid-template-columns:minmax(96px,200px) 1fr;gap:10px;align-items:center;font-size:13px}
+.hb-row.sub .hb-lab{padding-left:14px;color:var(--ink-2)}
+.hb-row.sub2 .hb-lab{padding-left:28px}
+.hb-bars{display:grid;gap:2px}
+.hb-bar{display:grid;grid-template-columns:1fr 112px;gap:8px;align-items:center}
+.hb-track{height:12px}
+.hb-track i{display:block;height:100%;border-radius:0 4px 4px 0}
+.hb-val{font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+#v-victims .card h3{margin:0 0 8px;font-size:14px}
 .caution-line{margin:0;padding:8px 12px;border-left:4px solid var(--accent);background:var(--accent-wash);border-radius:6px;font-size:13px;color:var(--ink)}
 .callout{border:1px solid var(--accent);border-left:5px solid var(--accent);background:var(--accent-wash);border-radius:10px;padding:14px 18px;margin:0 0 22px}
 .about .callout h2{margin:0 0 6px;font-size:17px;color:var(--ink)}
@@ -169,7 +179,11 @@ tr.click:hover td{background:var(--accent-wash)}
 .err{background:var(--accent-wash);border:1px solid var(--accent);border-radius:10px;padding:14px 16px}
 footer{color:var(--muted);font-size:12px;padding:0 0 30px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-@media (max-width:520px){.f-off select,.combo{width:100%}.field{flex:1 1 100%}.mapbox canvas{height:440px}}
+@media (max-width:520px){
+#v-victims .seg label{padding:0 6px;font-size:12px}
+.hb-row{grid-template-columns:minmax(80px,112px) 1fr}
+.hb-bar{grid-template-columns:1fr 92px}
+.f-off select,.combo{width:100%}.field{flex:1 1 100%}.mapbox canvas{height:440px}}
 </style>
 </head>
 <body>
@@ -186,6 +200,7 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
       <a href="#map" data-view="map">Map</a>
       <a href="#funnel" data-view="funnel">Funnel plot</a>
       <a href="#mix" data-view="mix">Offence mix</a>
+      <a href="#victims" data-view="victims">Victims</a>
       <a href="#about" data-view="about">About the data</a>
     </nav>
   </div>
@@ -360,6 +375,120 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
   </section>
 
   <!-- ===================== ABOUT ===================== -->
+  <!-- ===================== VICTIMS ===================== -->
+  <section id="v-victims" class="view" hidden>
+    <p class="caution-line" id="vi-intro"><b>These figures come from a different source.</b> The Victims tab uses annual Australian Bureau of Statistics counts of victims for Queensland as a whole. They are counted differently from the police offence figures on the other tabs, so the numbers will not match. <a href="#about">Read more in About the data</a></p>
+
+    <div class="card" id="vi-c1">
+      <div class="card-head">
+        <div><h2 id="vi1-h">Victims by offence</h2><p class="sub" id="vi1-s"></p></div>
+        <div class="filters">
+          <div class="field"><label for="vi1-off">Offence</label><select id="vi1-off"></select></div>
+          <div class="field"><span class="lab">Show</span><div class="seg" role="radiogroup" aria-label="Show">
+            <input type="radio" name="vi1-meas" id="vi1-rate" value="rate" checked><label for="vi1-rate">Rate per 100,000</label>
+            <input type="radio" name="vi1-meas" id="vi1-num" value="n"><label for="vi1-num">Number</label></div></div>
+          <label class="check" id="vi1-sub-wrap"><input type="checkbox" id="vi1-sub"> Show sub-types</label>
+        </div>
+      </div>
+      <div class="tiles" id="vi1-tiles" style="margin-bottom:12px"></div>
+      <div class="legend" id="vi1-leg"></div>
+      <div class="chart" id="vi1-chart"></div>
+      <p class="sub" id="vi1-notes" style="margin-top:8px"></p>
+      <details class="tbl" id="vi1-tbl"><summary>Show as table</summary><div class="tblbody"></div></details>
+    </div>
+
+    <div class="card" id="vi-c2">
+      <div class="card-head">
+        <div><h2 id="vi2-h">Age of victims</h2><p class="sub" id="vi2-s"></p></div>
+        <div class="filters">
+          <div class="field"><label for="vi2-off">Offence</label><select id="vi2-off"></select></div>
+          <div class="field"><span class="lab">Sex</span><div class="seg" role="radiogroup" aria-label="Sex">
+            <input type="radio" name="vi2-sex" id="vi2-sp" value="Persons" checked><label for="vi2-sp">All persons</label>
+            <input type="radio" name="vi2-sex" id="vi2-sf" value="Female"><label for="vi2-sf">Female</label>
+            <input type="radio" name="vi2-sex" id="vi2-sm" value="Male"><label for="vi2-sm">Male</label></div></div>
+          <div class="field"><span class="lab">Show</span><div class="seg" role="radiogroup" aria-label="Show">
+            <input type="radio" name="vi2-meas" id="vi2-rate" value="rate" checked><label for="vi2-rate">Rate per 100,000</label>
+            <input type="radio" name="vi2-meas" id="vi2-num" value="n"><label for="vi2-num">Number</label></div></div>
+          <div class="field" id="vi2-grp-wrap"><span class="lab">Age groups</span><div class="seg" role="radiogroup" aria-label="Age groups">
+            <input type="radio" name="vi2-grp" id="vi2-gh" value="h" checked><label for="vi2-gh">Consistent since 2010</label>
+            <input type="radio" name="vi2-grp" id="vi2-gp" value="p"><label for="vi2-gp">As published</label></div></div>
+        </div>
+      </div>
+      <div class="legend" id="vi2-leg"></div>
+      <div class="chart" id="vi2-chart"></div>
+      <details class="tbl" id="vi2-tbl"><summary>Show as table</summary><div class="tblbody"></div></details>
+      <h2 id="vi2-ph" style="margin-top:18px"></h2>
+      <p class="sub" id="vi2-ps"></p>
+      <div class="legend" id="vi2-pleg" style="margin-top:6px"></div>
+      <div id="vi2-prof"></div>
+    </div>
+
+    <div class="card" id="vi-c3">
+      <div class="card-head">
+        <div><h2 id="vi3-h">Relationship of offender to victim</h2><p class="sub" id="vi3-s"></p></div>
+        <div class="filters">
+          <div class="field"><label for="vi3-off">Offence</label><select id="vi3-off"></select></div>
+          <div class="field"><span class="lab">Sex of victim</span><div class="seg" role="radiogroup" aria-label="Sex of victim">
+            <input type="radio" name="vi3-sex" id="vi3-sp" value="Persons" checked><label for="vi3-sp">All persons</label>
+            <input type="radio" name="vi3-sex" id="vi3-sf" value="Female"><label for="vi3-sf">Female</label>
+            <input type="radio" name="vi3-sex" id="vi3-sm" value="Male"><label for="vi3-sm">Male</label></div></div>
+          <div class="field"><span class="lab">Show</span><div class="seg" role="radiogroup" aria-label="Show">
+            <input type="radio" name="vi3-meas" id="vi3-share" value="share" checked><label for="vi3-share">Share</label>
+            <input type="radio" name="vi3-meas" id="vi3-num" value="n"><label for="vi3-num">Number</label></div></div>
+        </div>
+      </div>
+      <div class="legend" id="vi3-leg"></div>
+      <div class="chart" id="vi3-chart"></div>
+      <details class="tbl" id="vi3-tbl"><summary>Show as table</summary><div class="tblbody"></div></details>
+    </div>
+
+    <div class="card" id="vi-c4">
+      <div class="card-head">
+        <div><h2 id="vi4-h">Family and domestic violence</h2><p class="sub" id="vi4-s"></p></div>
+        <div class="filters">
+          <div class="field"><label for="vi4-off">Offence</label><select id="vi4-off"></select></div>
+          <div class="field"><span class="lab">Show</span><div class="seg" role="radiogroup" aria-label="Show">
+            <input type="radio" name="vi4-meas" id="vi4-rate" value="rate" checked><label for="vi4-rate">Rate per 100,000</label>
+            <input type="radio" name="vi4-meas" id="vi4-num" value="n"><label for="vi4-num">Number</label>
+            <input type="radio" name="vi4-meas" id="vi4-share" value="share"><label for="vi4-share">Share of all victims</label></div></div>
+        </div>
+      </div>
+      <div class="legend" id="vi4-leg"></div>
+      <div class="chart" id="vi4-chart"></div>
+      <details class="tbl" id="vi4-tbl"><summary>Show as table</summary><div class="tblbody"></div></details>
+    </div>
+
+    <div class="card" id="vi-c5">
+      <div class="card-head">
+        <div><h2 id="vi5-h">Sexual assault: time between incident and report</h2><p class="sub" id="vi5-s"></p></div>
+        <div class="filters">
+          <div class="field"><span class="lab">Sex of victim</span><div class="seg" role="radiogroup" aria-label="Sex of victim">
+            <input type="radio" name="vi5-sex" id="vi5-sp" value="Persons" checked><label for="vi5-sp">All persons</label>
+            <input type="radio" name="vi5-sex" id="vi5-sf" value="Female"><label for="vi5-sf">Female</label>
+            <input type="radio" name="vi5-sex" id="vi5-sm" value="Male"><label for="vi5-sm">Male</label></div></div>
+          <div class="field"><span class="lab">Show</span><div class="seg" role="radiogroup" aria-label="Show">
+            <input type="radio" name="vi5-meas" id="vi5-share" value="share" checked><label for="vi5-share">Share</label>
+            <input type="radio" name="vi5-meas" id="vi5-num" value="n"><label for="vi5-num">Number</label></div></div>
+        </div>
+      </div>
+      <div class="legend" id="vi5-leg"></div>
+      <div class="chart" id="vi5-chart"></div>
+      <details class="tbl" id="vi5-tbl"><summary>Show as table</summary><div class="tblbody"></div></details>
+      <h2 id="vi5-ph" style="margin-top:18px"></h2>
+      <p class="sub" id="vi5-ps"></p>
+      <div class="legend" id="vi5-pleg" style="margin-top:6px"></div>
+      <div id="vi5-prof"></div>
+    </div>
+
+    <div class="card" id="vi-c6">
+      <div class="card-head">
+        <div><h2 id="vi6-h">Circumstances and police outcome</h2><p class="sub" id="vi6-s"></p></div>
+        <div class="filters"><div class="field"><label for="vi6-off">Offence</label><select id="vi6-off"></select></div></div>
+      </div>
+      <div class="cols" id="vi6-grid"></div>
+    </div>
+  </section>
+
   <section id="v-about" class="view" hidden>
     <div class="card about" id="about-body"></div>
   </section>
@@ -1077,6 +1206,7 @@ function renderAbout() {
   const li = (...k) => { const e = el('li'); e.append(...k); return e; };
   const B = t => el('b', {text: t});
   const small = el('span');
+  const vrel = el('span'); getVictims().then(V => { vrel.textContent = `The figures here are from the ${V.latest} release, and are updated once a year when ABS publishes a new one.`; }).catch(() => {});
   const caution = el('div', {class: 'callout', role: 'note'},
     H('Interpret rates for individual places with caution'),
     P('Rates for a single local government area or police division can mislead if read on their own.'),
@@ -1103,7 +1233,8 @@ function renderAbout() {
       li(B('Biggest changes: '), 'see which combinations of crime type and place have risen or fallen the most.'),
       li(B('Map: '), 'compare rates across Queensland, or search for a place.'),
       li(B('Funnel plot: '), 'see which areas sit well above or below the Queensland rate once the size of their population is taken into account.'),
-      li(B('Offence mix: '), 'see how the make-up of recorded crime in a place has shifted over time.')),
+      li(B('Offence mix: '), 'see how the make-up of recorded crime in a place has shifted over time.'),
+      li(B('Victims: '), 'see how the number and rate of victims of selected offences in Queensland have changed each year, by type of offence and by the age and sex of victims.')),
     H('Understanding the numbers'),
     el('ul', null,
       li(B('Rates, not counts. '), 'Figures are shown per 100,000 people so that places with different populations can be compared fairly.'),
@@ -1114,11 +1245,24 @@ function renderAbout() {
       li(B('Residents, not visitors. '), 'Rates are based on the number of people who live in an area. Places with many visitors or workers compared with residents can show high rates for that reason.'),
       li(B('Seasons. '), 'Recorded crime rises and falls through the year. The rolling 12-month view removes that pattern and is the better guide to the underlying trend. QPS advises care when comparing one month with the next.'),
       li(B('No adjustment for who lives there. '), 'Rates are not adjusted for the age profile or other characteristics of an area.')),
+    H('About the Victims tab'),
+    P('The Victims tab uses a different source from the rest of this site: ', link('ABS, Recorded Crime – Victims', 'https://www.abs.gov.au/statistics/people/crime-and-justice/recorded-crime-victims/latest-release'), ', which ABS compiles each year from state and territory police records using national counting rules. ', vrel),
+    el('ul', null,
+      li(B('Victims, not offences. '), 'The other tabs count offences recorded by Queensland police each month. The Victims tab counts victims in each calendar year, for a selected set of offences, for Queensland as a whole. The two sets of figures are counted differently and will not match.'),
+      li(B('Not a count of individual people. '), 'ABS does not count unique people. A person who is a victim of more than one type of offence is counted once under each type. See the ', link('ABS Recorded Crime – Victims methodology', 'https://www.abs.gov.au/methodologies/recorded-crime-victims-methodology/2025'), '.'),
+      li(B('Who counts as a victim. '), 'For homicide, assault, sexual assault and kidnapping or abduction, the victim is a person. For robbery, blackmail or extortion and other theft, the victim can be a person or an organisation. For burglary the victim is the premises, and for motor vehicle theft it is the vehicle. Figures by age, sex and relationship cover people only.'),
+      li(B('Counted when reported. '), 'A victim is counted in the year the offence was reported to, or detected by, police. That is not always the year it happened, which matters most for sexual assault, where many reports are made long after the incident.'),
+      li(B('Changes over time in how the data are recorded. '), 'ABS marks several breaks that affect Queensland: a new offence classification in 1999, 2009, 2010 and 2025; the National Crime Recording Standard, introduced in Queensland from 2007 and completed in 2010; and the removal from 2009 of reports that police later determined were not crimes. Figures either side of these years should be compared with care.'),
+      li(B('Assault. '), 'ABS does not publish Queensland assault victims before 2022, or Queensland assault by relationship or family and domestic violence status before 2023.'),
+      li(B('A change in police recording in 2021. '), 'From 1 July 2021, Queensland police have been required to record every criminal offence linked to a domestic and family violence incident. The Queensland Government Statistician treats 2021–22 as a break in the series for domestic and family violence-related figures (', link('Queensland Government statement, 6 April 2023', 'https://statements.qld.gov.au/statements/97530'), '). ABS victim counts are compiled from the same police records, so figures from 2021 may not be directly comparable with earlier years, particularly for offences that often occur in a family or domestic setting.'),
+      li(B('Age groups. '), 'ABS changed the age groups it publishes in 2021. To show a consistent series from 2010, this site combines ages 10 to 24 for sexual assault, robbery and assault, and uses three broad groups for homicide, kidnapping or abduction, and blackmail or extortion.'),
+      li(B('Family and domestic violence. '), 'ABS treats a victim as family and domestic violence-related where the relationship recorded by police is a specified family or domestic one, or where police have recorded a family and domestic violence flag.')),
     H('Where the data come from'),
     el('ul', null,
       li(link('Queensland Police Service, Maps and statistics', 'https://www.police.qld.gov.au/maps-and-statistics'), ': reported offences for Queensland, local government areas and police divisions; reported offenders by age group and sex for Queensland and local government areas; police division boundaries.'),
       li(link('ABS, National, state and territory population', 'https://www.abs.gov.au/statistics/people/population/national-state-and-territory-population/latest-release'), `: Queensland population by single year of age and sex, at 30 June each year to ${META.abs_last_june}.`),
       li(link('ABS, Regional population by age and sex', 'https://www.abs.gov.au/statistics/people/population/regional-population-age-and-sex/latest-release'), `: population of each local government area by age group and sex, 30 June ${META.start_year} to ${META.abs_lga_last_june}.`),
+      li(link('ABS, Recorded Crime – Victims', 'https://www.abs.gov.au/statistics/people/crime-and-justice/recorded-crime-victims/latest-release'), ': victims of selected offences in Queensland by offence, age, sex, relationship of offender to victim, family and domestic violence status, location, weapon use and investigation outcome (Victims tab only). Age figures before the latest year come from the release for each year from 2010.'),
       li(link('ABS, digital boundary files', 'https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs-edition-3/jul2021-jun2026/access-and-downloads/digital-boundary-files'), ': local government area boundaries (2025).')),
     P('Police divisions are the smallest areas for which QPS publishes offence counts. Offender counts are published for Queensland and local government areas only, so offender rates are not available for police divisions.'),
     H('Method in detail'),
@@ -1132,11 +1276,245 @@ function renderAbout() {
       li(B('Between and beyond 30 June estimates. '), `ABS age estimates are for 30 June each year. Monthly values are linearly interpolated, and months after June ${META.abs_last_june} are extrapolated at the latest annual rate of change until ABS releases its next estimates.`),
       li(B('Funnel plot. '), 'Each area’s rate for a 12-month period is plotted against its population, with the Queensland rate as the centre line and 95% and 99.8% control limits, following ', link('Spiegelhalter (2005), Funnel plots for comparing institutional performance, Statistics in Medicine', 'https://doi.org/10.1002/sim.1970'), '. Limits use a square-root transformation of the Poisson count: z = 2(√observed − √expected), where expected is the count at the Queensland rate. The adjusted option estimates an overdispersion factor φ as the mean squared z-score after winsorising the top and bottom 10% of z-scores, and widens the limits by √φ.'),
       li(B('Offence mix '), 'shows each category’s share of the offences in its parent group, or the stacked rate, for each 12 months ending in the latest month of data. QPS does not publish a total across all offences, so the all-offences view is the sum of the three QPS offence divisions. Where a group has more than seven categories, the seven largest statewide are shown and the rest are combined.'),
+      li(B('Victim rates. '), 'Where ABS publishes a victimisation rate (homicide, assault, sexual assault and kidnapping or abduction; age and sex for the latest year; family and domestic violence), that rate is shown. Otherwise the rate is calculated here as ABS victim counts per 100,000 of the ABS estimated resident population of Queensland at 30 June of the same year, in the matching age group and sex. Calculated this way, the age and sex rates for the latest year agree with those ABS publishes to within 0.4%.'),
+      li(B('Victim age series. '), 'ABS publishes victims by age for the latest year only, so the series from 2010 is assembled from the release for each year, as first published. Those figures are not revised when ABS later updates its totals. Sexual assault from 2014 is the exception: it uses the revised figures in the latest release. Homicide by age is not available for 2015. ABS randomly adjusts the cells in its tables to protect confidentiality, so the parts do not always add exactly to the total.'),
       li(B('Boundaries. '), 'Police division boundaries are the current QPS boundaries. Map shapes are simplified for display and are not survey-accurate.')));
 }
 
+/* ---------- generic annual charts (used by the Victims tab) ---------- */
+function annualChart(host, cfg) {
+  /* cfg: {years, series:[{name,color,vals,dash}], marks:[year], height, aria, suffix} */
+  host.textContent = '';
+  const yrs = cfg.years; let i0 = yrs.length, i1 = -1, ymax = 0;
+  cfg.series.forEach(s => s.vals.forEach((v, i) => { if (v != null) { if (i < i0) i0 = i; if (i > i1) i1 = i; if (v > ymax) ymax = v; } }));
+  if (i1 < 0) { host.append(el('p', {class: 'sub', text: 'Not published for this selection.'})); return; }
+  const W = Math.max(300, host.clientWidth || 800), H = cfg.height || 300, m = {l: 52, r: 66, t: 12, b: 28}, pw = W - m.l - m.r, ph = H - m.t - m.b;
+  if (!(ymax > 0)) ymax = 1;
+  const step = niceStep(ymax * 1.04, 4.5), ytop = Math.ceil(ymax * 1.04 / step) * step, suf = cfg.suffix || '';
+  const x = i => m.l + (i1 === i0 ? pw / 2 : (i - i0) / (i1 - i0) * pw), y = v => m.t + ph - v / ytop * ph;
+  const svg = sv('svg', {viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', tabindex: 0, 'aria-label': cfg.aria});
+  const dec = step < 1 ? (step < 0.1 ? 2 : 1) : 0;
+  for (let v = 0; v <= ytop + 1e-9; v += step) { svg.append(sv('line', {x1: m.l, x2: m.l + pw, y1: y(v), y2: y(v), stroke: v === 0 ? 'var(--base)' : 'var(--hair)'})); svg.append(sv('text', {x: m.l - 8, y: y(v) + 4, 'text-anchor': 'end', text: v.toLocaleString('en-AU', {minimumFractionDigits: dec, maximumFractionDigits: dec}) + suf})); }
+  const n = i1 - i0, maxTicks = Math.max(2, Math.floor(pw / 52)), ystep = [1, 2, 5, 10].find(s => n / s <= maxTicks) || 10;
+  for (let i = i0; i <= i1; i++) if (yrs[i] % ystep === 0 || n <= maxTicks) { svg.append(sv('line', {x1: x(i), x2: x(i), y1: m.t + ph, y2: m.t + ph + 4, stroke: 'var(--base)'})); svg.append(sv('text', {x: x(i), y: H - 8, 'text-anchor': 'middle', text: yrs[i]})); }
+  for (const my of [...new Set(cfg.marks || [])]) { const i = yrs.indexOf(my); if (i > i0 && i <= i1) svg.append(sv('line', {x1: x(i), x2: x(i), y1: m.t, y2: m.t + ph, stroke: 'var(--muted)', 'stroke-width': 1, 'stroke-dasharray': '2 3'})); }
+  const ends = [];
+  cfg.series.forEach(s => {
+    let d = '', pen = false, last = -1;
+    for (let i = i0; i <= i1; i++) { const v = s.vals[i]; if (v == null) { pen = false; continue; } d += (pen ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); pen = true; last = i; }
+    if (last < 0) return;
+    if (cfg.series.length === 1) { let a = ''; let seg = []; const flush = () => { if (seg.length > 1) a += 'M' + seg.map(i => x(i).toFixed(1) + ' ' + y(s.vals[i]).toFixed(1)).join('L') + `L${x(seg[seg.length - 1]).toFixed(1)} ${y(0)}L${x(seg[0]).toFixed(1)} ${y(0)}Z`; seg = []; }; for (let i = i0; i <= i1; i++) { if (s.vals[i] == null) flush(); else seg.push(i); } flush(); if (a) svg.append(sv('path', {d: a, fill: s.color, opacity: .1})); }
+    svg.append(sv('path', {d, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': s.dash ? 'butt' : 'round', 'stroke-dasharray': s.dash ? '6 4' : null}));
+    for (let i = i0; i <= i1; i++) if (s.vals[i] != null && (s.vals[i - 1] == null && s.vals[i + 1] == null)) svg.append(sv('circle', {cx: x(i), cy: y(s.vals[i]), r: 3, fill: s.color}));
+    ends.push({s, i: last, yy: y(s.vals[last]), v: s.vals[last]});
+  });
+  ends.sort((a, b) => a.yy - b.yy); let prevY = -99;
+  for (const e of ends) { svg.append(sv('circle', {cx: x(e.i), cy: e.yy, r: 4, fill: e.s.color, stroke: 'var(--surface)', 'stroke-width': 2})); if (e.yy - prevY >= 14 && e.i === i1) { svg.append(sv('text', {class: 'endlab', x: x(e.i) + 9, y: e.yy + 4, text: fRate(e.v) + suf})); prevY = e.yy; } }
+  const cross = sv('line', {y1: m.t, y2: m.t + ph, stroke: 'var(--muted)', 'stroke-width': 1, visibility: 'hidden'});
+  const dots = cfg.series.map(s => sv('circle', {r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, visibility: 'hidden'}));
+  svg.append(cross, ...dots);
+  const tip = el('div', {class: 'tip', hidden: ''}); let cur = i1;
+  const show = i => {
+    cur = Math.max(i0, Math.min(i1, i)); cross.setAttribute('x1', x(cur)); cross.setAttribute('x2', x(cur)); cross.setAttribute('visibility', 'visible');
+    tip.textContent = ''; tip.append(el('div', {class: 'h', text: String(yrs[cur])}));
+    cfg.series.map((s, k) => ({s, k, v: s.vals[cur]})).sort((a, b) => (b.v == null ? -1 : b.v) - (a.v == null ? -1 : a.v)).forEach(({s, k, v}) => {
+      if (v == null) { dots[k].setAttribute('visibility', 'hidden'); return; }
+      dots[k].setAttribute('cx', x(cur)); dots[k].setAttribute('cy', y(v)); dots[k].setAttribute('visibility', 'visible');
+      const key = el('i'); key.style.borderTopColor = s.color; if (s.dash) key.style.borderTopStyle = 'dashed';
+      tip.append(el('div', {class: 'r'}, key, el('b', {text: fRate(v) + suf}), el('span', {text: s.name})));
+    });
+    tip.hidden = false; const px = x(cur) / W * host.clientWidth, tw = tip.offsetWidth;
+    tip.style.left = (px + 14 + tw > host.clientWidth ? Math.max(0, px - tw - 14) : px + 14) + 'px'; tip.style.top = (m.t + 6) + 'px';
+  };
+  const hide = () => { cross.setAttribute('visibility', 'hidden'); dots.forEach(d => d.setAttribute('visibility', 'hidden')); tip.hidden = true; };
+  svg.addEventListener('pointermove', e => { const r = svg.getBoundingClientRect(); show(Math.round(i0 + ((e.clientX - r.left) / r.width * W - m.l) / pw * (i1 - i0))); });
+  svg.addEventListener('pointerleave', hide); svg.addEventListener('focus', () => show(cur)); svg.addEventListener('blur', hide);
+  svg.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') { e.preventDefault(); show(cur - 1); } else if (e.key === 'ArrowRight') { e.preventDefault(); show(cur + 1); } });
+  host.append(svg, tip);
+}
+function stackChart(host, cfg) {
+  /* cfg: {cats, series:[{name,color,vals}], pct, aria, tipTitle} */
+  host.textContent = '';
+  const nb = cfg.cats.length, tot = cfg.cats.map((_, b) => cfg.series.reduce((a, s) => a + (s.vals[b] || 0), 0));
+  const has = cfg.cats.map((_, b) => cfg.series.some(s => s.vals[b] != null) && tot[b] > 0);
+  if (!has.some(Boolean)) { host.append(el('p', {class: 'sub', text: 'Not published for this selection.'})); return; }
+  const b0 = has.indexOf(true), cats = cfg.cats.slice(b0), off = b0, n = cats.length;
+  const val = (s, b) => { const v = s.vals[b + off] || 0; return cfg.pct ? (tot[b + off] > 0 ? v / tot[b + off] * 100 : 0) : v; };
+  const W = Math.max(300, host.clientWidth || 800), H = cfg.height || 320, m = {l: 52, r: 14, t: 12, b: 28}, pw = W - m.l - m.r, ph = H - m.t - m.b;
+  let top, step; if (cfg.pct) { top = 100; step = 25; } else { const mx = Math.max(...cats.map((_, b) => tot[b + off]), 1e-9); step = niceStep(mx * 1.04, 4.5); top = Math.ceil(mx * 1.04 / step) * step; }
+  const y = v => m.t + ph - v / top * ph, band = pw / n, bw = Math.max(4, Math.min(40, band - 3)), bx = b => m.l + band * b + (band - bw) / 2;
+  const svg = sv('svg', {viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', tabindex: 0, 'aria-label': cfg.aria});
+  for (let v = 0; v <= top + 1e-9; v += step) { svg.append(sv('line', {x1: m.l, x2: m.l + pw, y1: y(v), y2: y(v), stroke: v === 0 ? 'var(--base)' : 'var(--hair)'})); svg.append(sv('text', {x: m.l - 8, y: y(v) + 4, 'text-anchor': 'end', text: fInt(v) + (cfg.pct ? '%' : '')})); }
+  const everyN = Math.ceil(40 / band);
+  cats.forEach((c, b) => { let acc = 0; if (!has[b + off]) return; cfg.series.forEach(s => { const v = val(s, b); if (v <= 0) return; const y1 = y(acc + v), h = y(acc) - y1; svg.append(sv('rect', {x: bx(b), y: y1, width: bw, height: Math.max(0, h - (h > 3 ? 2 : 0)), fill: s.color, rx: h > 6 ? 1.5 : 0})); acc += v; }); if ((n - 1 - b) % everyN === 0) svg.append(sv('text', {x: bx(b) + bw / 2, y: H - 8, 'text-anchor': 'middle', text: c})); });
+  const hl = sv('rect', {y: m.t, height: ph, width: band, fill: 'var(--ink)', opacity: .06, visibility: 'hidden'}); svg.insertBefore(hl, svg.firstChild);
+  const tip = el('div', {class: 'tip', hidden: ''}); let cur = n - 1;
+  const show = b => { cur = Math.max(0, Math.min(n - 1, b)); hl.setAttribute('x', m.l + band * cur); hl.setAttribute('visibility', 'visible'); tip.textContent = ''; tip.append(el('div', {class: 'h', text: cats[cur] + ' · ' + fInt(tot[cur + off]) + ' ' + (cfg.unit || 'victims')}));
+    cfg.series.slice().reverse().forEach(s => { const k = el('i', {class: 'sw'}); k.style.background = s.color; const raw = s.vals[cur + off] || 0; tip.append(el('div', {class: 'r'}, k, el('b', {text: cfg.pct ? nf1.format(val(s, cur)) + '%' : fInt(raw)}), el('span', {text: s.name + (cfg.pct ? ` (${fInt(raw)})` : '')}))); });
+    tip.hidden = false; const px = (m.l + band * (cur + .5)) / W * host.clientWidth, tw = tip.offsetWidth; tip.style.left = (px + 16 + tw > host.clientWidth ? Math.max(0, px - tw - 16) : px + 16) + 'px'; tip.style.top = (m.t + 4) + 'px'; };
+  const hide = () => { tip.hidden = true; hl.setAttribute('visibility', 'hidden'); };
+  svg.addEventListener('pointermove', e => { const r = svg.getBoundingClientRect(); show(Math.floor(((e.clientX - r.left) / r.width * W - m.l) / band)); });
+  svg.addEventListener('pointerleave', hide); svg.addEventListener('focus', () => show(cur)); svg.addEventListener('blur', hide);
+  svg.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') { e.preventDefault(); show(cur - 1); } else if (e.key === 'ArrowRight') { e.preventDefault(); show(cur + 1); } });
+  host.append(svg, tip);
+}
+function hbars(host, rows, opt) {
+  /* rows: [{label, sub, bars:[{v,color,text}]}]; bars share one scale */
+  host.textContent = ''; opt = opt || {};
+  const mx = Math.max(...rows.flatMap(r => r.bars.map(b => b.v || 0)), 1e-9);
+  const wrap = el('div', {class: 'hb'});
+  for (const r of rows) {
+    const bars = el('div', {class: 'hb-bars'});
+    for (const b of r.bars) { const f = el('i'); f.style.width = Math.max(b.v > 0 ? 0.6 : 0, (b.v || 0) / mx * 100) + '%'; f.style.background = b.color; bars.append(el('div', {class: 'hb-bar'}, el('div', {class: 'hb-track'}, f), el('span', {class: 'hb-val', text: b.v == null ? 'np' : b.text}))); }
+    wrap.append(el('div', {class: 'hb-row' + (r.sub ? ' sub' + (r.sub === 2 ? ' sub2' : '') : '')}, el('div', {class: 'hb-lab', text: r.label}), bars));
+  }
+  host.append(wrap);
+}
+function simpleTable(details, head, rows, csvRows) {
+  const body = $('.tblbody', details);
+  const build = () => {
+    body.textContent = '';
+    const tr = el('tr'); head.forEach((h, i) => tr.append(el('th', {class: i ? 'num' : '', text: h})));
+    const tb = el('tbody'); rows.forEach(r => { const x = el('tr'); r.forEach((c, i) => x.append(el('td', {class: i ? 'num' : '', text: c}))); tb.append(x); });
+    const lines = [head.map(h => '"' + h + '"').join(',')].concat((csvRows || rows).map(r => r.join(',')));
+    const btn = el('button', {class: 'btn', type: 'button', text: 'Copy as CSV'});
+    btn.addEventListener('click', async () => { try { await navigator.clipboard.writeText(lines.join('\n')); btn.textContent = 'Copied'; } catch (e) { btn.textContent = 'Copy blocked by browser'; } setTimeout(() => { btn.textContent = 'Copy as CSV'; }, 1800); });
+    body.append(el('div', {style: 'margin-top:8px'}, btn), el('div', {class: 'tblwrap'}, el('table', null, el('thead', null, tr), tb)));
+  };
+  details.ontoggle = () => { if (details.open) build(); }; if (details.open) build();
+}
+function swLegend(host, series, line) {
+  host.textContent = '';
+  for (const s of series) { const k = el('i', line ? null : {class: 'sw'}); if (line) { k.style.color = s.color; if (s.dash) k.style.borderTopStyle = 'dashed'; } else k.style.background = s.color; host.append(el('span', null, k, document.createTextNode(s.name))); }
+}
+
+/* ---------- VICTIMS ---------- */
+let VICTIMS = null, viReady = false;
+function getVictims() { if (!VICTIMS) VICTIMS = getJSON('victims.json'); return VICTIMS; }
+const AGE_LABEL = b => b.replace('-', '–').replace('+', ' and over') + (/\+$/.test(b) ? '' : ' years');
+const radio = name => $(`input[name="${name}"]:checked`).value;
+async function renderVictims() {
+  let V; try { V = await getVictims(); } catch (e) { return fatal(e); }
+  const T = V.trends, A = V.age, ly = V.latest;
+  if (!viReady) {
+    viReady = true;
+    const o1 = $('#vi1-off'); T.offences.forEach((o, i) => o1.append(el('option', {value: i, text: '   '.repeat(o.lvl) + o.name}))); o1.value = T.offences.findIndex(o => o.name === 'Sexual assault');
+    const o2 = $('#vi2-off'); ['Assault', 'Sexual assault', 'Robbery', 'Homicide', 'Kidnapping/abduction', 'Blackmail/other extortion'].filter(k => A.trend[k]).forEach(k => o2.append(el('option', {value: k, text: k}))); o2.value = 'Sexual assault';
+    const o3 = $('#vi3-off'); Object.keys(V.relationship.offences).forEach(k => o3.append(el('option', {value: k, text: k}))); o3.value = 'Sexual assault';
+    const o4 = $('#vi4-off'); Object.keys(V.fdv.offences).forEach(k => o4.append(el('option', {value: k, text: k}))); o4.value = 'Sexual assault';
+    const o6 = $('#vi6-off'); Object.keys(V.snapshot.outcome).forEach(k => o6.append(el('option', {value: k, text: k}))); o6.value = 'Assault';
+    $$('#v-victims select, #v-victims input').forEach(i => i.addEventListener('change', renderVictims));
+  }
+  /* 1. offence trends */
+  {
+    const o = T.offences[+$('#vi1-off').value], meas = radio('vi1-meas'), kids = T.offences.filter(k => k.parent === o.name && k.lvl === 1);
+    $('#vi1-sub-wrap').hidden = !kids.length;
+    const useAbs = o.rate_abs.some(v => v != null), rate = k => (k.rate_abs.some(v => v != null) ? k.rate_abs : k.rate_calc), pick = k => meas === 'rate' ? rate(k) : k.counts;
+    const series = [{name: o.name, color: 'var(--s1)', vals: pick(o)}];
+    if (kids.length && $('#vi1-sub').checked) kids.forEach((k, i) => series.push({name: k.name, color: `var(--s${i + 2})`, vals: pick(k)}));
+    const yrsWith = T.years.filter((_, i) => o.counts[i] != null), first = yrsWith[0];
+    $('#vi1-h').textContent = `${o.name}: victims in Queensland, ${first}–${ly}`;
+    $('#vi1-s').textContent = (meas === 'rate' ? `Victims per 100,000 population per year. ${useAbs ? 'Rates as published by ABS.' : 'ABS does not publish a rate for this offence; this one is calculated here from ABS victim counts and ABS population.'}` : 'Number of victims recorded each year.') + (o.person_only ? '' : /burglary/i.test(o.name) ? ' For burglary, ABS counts each premises as a victim.' : o.name === 'Motor vehicle theft' ? ' For motor vehicle theft, ABS counts each vehicle as a victim.' : ' For this offence a victim can be an organisation as well as a person.');
+    const li = T.years.length - 1, c1 = o.counts[li], c0 = o.counts[li - 1], c10 = o.counts[li - 10], tiles = $('#vi1-tiles'); tiles.textContent = '';
+    const chg = (a, b) => (a != null && b > 0) ? (a / b - 1) * 100 : null, r = rate(o);
+    const mk = (k, v, unit, d, lab, n) => { const t = el('div', {class: 'tile'}, el('div', {class: 'k', text: k})); const vv = el('div', {class: 'v', text: v}); if (unit) vv.append(' ', el('small', {text: unit})); t.append(vv); if (d != null) t.append(el('div', {class: 'd'}, el('span', {class: d > 0 ? 'arrow-up' : d < 0 ? 'arrow-down' : '', text: d > 0 ? '▲ ' : d < 0 ? '▼ ' : ''}), el('b', {text: fPct(d)}), ' ' + lab)); if (n) t.append(el('div', {class: 'n', text: n})); return t; };
+    tiles.append(mk(`Victims in ${ly}`, c1 == null ? 'np' : fInt(c1), '', chg(c1, c0), `on ${ly - 1}`, c0 != null ? `${fInt(c0)} in ${ly - 1}` : ''),
+      mk(`Rate in ${ly}`, r[li] == null ? 'np' : fRate(r[li]), 'per 100,000', chg(r[li], r[li - 1]), `on ${ly - 1}`, useAbs ? 'ABS published rate' : 'Calculated from ABS counts and population'),
+      mk('Ten-year change in rate', chg(r[li], r[li - 10]) == null ? 'n/a' : fPct(chg(r[li], r[li - 10])), '', null, '', r[li - 10] != null ? `${fRate(r[li - 10])} per 100,000 in ${ly - 10}` : `Not published for ${ly - 10}`));
+    swLegend($('#vi1-leg'), series.length > 1 ? series : [], true);
+    const marks = T.breaks.map(b => b.year).filter(y => y > first);
+    annualChart($('#vi1-chart'), {years: T.years, series, marks, aria: `Line chart of ${o.name} victims in Queensland by year`});
+    const notes = $('#vi1-notes'); notes.textContent = '';
+    const shown = T.breaks.filter(b => b.year > first);
+    if (shown.length) { notes.append(el('b', {text: 'Dotted lines mark changes ABS made to how the data are recorded or classified. '})); notes.append(shown.map(b => `${b.year}: ${b.note.replace(/\.$/, '')}`).join('; ') + '. Compare figures across these years with care.'); }
+    if (o.name === 'Assault') notes.append(' ABS does not publish Queensland assault victims before 2022.');
+    simpleTable($('#vi1-tbl'), ['Year', ...series.map(s => s.name)], T.years.map((y, i) => [y, ...series.map(s => s.vals[i] == null ? '' : (meas === 'rate' ? fRate(s.vals[i]) : fInt(s.vals[i])))]).filter(r => r.slice(1).some(c => c !== '')).reverse(),
+      T.years.map((y, i) => [y, ...series.map(s => s.vals[i] == null ? '' : s.vals[i])]).filter(r => r.slice(1).some(c => c !== '')).reverse());
+  }
+  /* 2. age */
+  {
+    const off = $('#vi2-off').value, sex = radio('vi2-sex'), meas = radio('vi2-meas'), tr = A.trend[off], canPub = !!A.published[off];
+    $('#vi2-grp-wrap').hidden = !canPub; const pub = canPub && radio('vi2-grp') === 'p';
+    const bands = pub ? A.published_bands : tr.bands, counts = pub ? A.published[off][sex] : tr[sex].n, pops = A.pop[pub ? 'P9' : tr.scheme][sex];
+    const series = bands.map((b, bi) => ({name: AGE_LABEL(b), color: `var(--s${bi + 1})`, vals: counts[bi].map((n, yi) => n == null ? null : meas === 'rate' ? n / pops[bi][yi] * 1e5 : n)}));
+    const sexTxt = sex === 'Persons' ? '' : sex === 'Female' ? ', female victims' : ', male victims';
+    $('#vi2-h').textContent = `${off}: victims by age at report${sexTxt}, Queensland`;
+    const firstY = A.years.find((_, yi) => series.some(s => s.vals[yi] != null));
+    $('#vi2-s').textContent = (meas === 'rate' ? 'Victims per 100,000 people of the same age' + (sex === 'Persons' ? '' : ' and sex') + ', calculated here from ABS victim counts and ABS population. ' : 'Number of victims. ') +
+      (pub ? `Age groups as ABS currently publishes them, available from ${firstY}.` : tr.scheme === 'H7' ? 'ABS changed its age groups in 2021 (from 10–14, 15–19 and 20–24 to 10–17 and 18–24), so the 10–24 group is used to keep the series consistent. The dotted line marks that change.' : 'ABS publishes only broad age groups for this offence, and changed them over time; the groups here are the ones that can be kept consistent, and dotted lines mark the changes. Numbers are small and vary from year to year.') +
+      (off === 'Robbery' || off === 'Blackmail/other extortion' ? ' Person victims only.' : '') + (off === 'Assault' ? ' Queensland assault data begin in 2022.' : '');
+    swLegend($('#vi2-leg'), series, true);
+    annualChart($('#vi2-chart'), {years: A.years, series, marks: pub ? [] : tr.scheme === 'H7' ? [2021] : [2016, 2021], aria: `Line chart of ${off} victims by age group in Queensland by year`});
+    simpleTable($('#vi2-tbl'), ['Year', ...series.map(s => s.name)], A.years.map((y, i) => [y, ...series.map(s => s.vals[i] == null ? '' : (meas === 'rate' ? fRate(s.vals[i]) : fInt(s.vals[i])))]).filter(r => r.slice(1).some(c => c !== '')).reverse(),
+      A.years.map((y, i) => [y, ...series.map(s => s.vals[i] == null ? '' : (meas === 'rate' ? s.vals[i].toFixed(2) : s.vals[i]))]).filter(r => r.slice(1).some(c => c !== '')).reverse());
+    /* profile for the latest year, as published by ABS */
+    const P = A.profile[off] || {}, allB = (P.Persons || []).map(x => x.band), hasB = b => allB.includes(b);
+    const pb = allB.filter(b => b !== 'Total' && !(b === '0-17' && hasB('0-9')) && !(b === '18+' && (hasB('18-24') || hasB('18-34'))));
+    $('#vi2-ph').textContent = `${off}: age and sex of victims, ${A.profile_year}`;
+    $('#vi2-ps').textContent = 'Victims per 100,000 people of the same age and sex, as published by ABS. The number of victims is shown in brackets.';
+    swLegend($('#vi2-pleg'), [{name: 'Female', color: 'var(--s2)'}, {name: 'Male', color: 'var(--s1)'}]);
+    const get = (sx, b) => (P[sx] || []).find(x => x.band === b);
+    hbars($('#vi2-prof'), pb.map(b => ({label: AGE_LABEL(b), bars: ['Female', 'Male'].map(sx => { const c = get(sx, b); return {v: c ? c.rate : null, color: sx === 'Female' ? 'var(--s2)' : 'var(--s1)', text: c ? `${fRate(c.rate)} (${fInt(c.n)})` : 'np'}; })})));
+  }
+  /* 3. relationship */
+  {
+    const R = V.relationship, off = $('#vi3-off').value, sex = radio('vi3-sex'), share = radio('vi3-meas') === 'share';
+    const hasSex = !!(R.by_sex[off] && R.by_sex[off][sex]); const useSex = sex !== 'Persons' && hasSex;
+    const d = useSex ? R.by_sex[off][sex] : R.offences[off], years = useSex ? R.years_sex : R.years;
+    const other = d.known.map((k, i) => k == null || d.family[i] == null ? d.nonfamily[i] : Math.max(0, k - d.family[i]));
+    const unk = d.total.map((t, i) => t == null || d.known[i] == null ? null : Math.max(0, t - d.known[i] - (d.stranger[i] || 0)));
+    const series = [{name: 'Family member', color: 'var(--s1)', vals: d.family}, {name: 'Other person known to victim', color: 'var(--s3)', vals: other}, {name: 'Stranger', color: 'var(--s2)', vals: d.stranger}, {name: 'No offender identified, or not stated', color: 'var(--ref)', vals: unk}];
+    $('#vi3-h').textContent = `${off}: relationship of offender to victim${sex === 'Persons' || !useSex ? '' : sex === 'Female' ? ', female victims' : ', male victims'}, Queensland`;
+    $('#vi3-s').textContent = (share ? 'Share of victims each year.' : 'Number of victims each year.') + ' The relationship is as recorded by police.' + (sex !== 'Persons' && !hasSex ? ' ABS does not publish this offence by sex of victim; all persons are shown.' : '') + (off === 'Assault' ? ' Queensland assault data by relationship begin in 2023.' : '');
+    swLegend($('#vi3-leg'), series);
+    stackChart($('#vi3-chart'), {cats: years.map(String), series, pct: share, aria: `Stacked bar chart of the relationship of offender to victim for ${off} in Queensland by year`});
+    simpleTable($('#vi3-tbl'), ['Year', ...series.map(s => s.name), 'Total'], years.map((y, i) => [y, ...series.map(s => s.vals[i] == null ? '' : fInt(s.vals[i])), d.total[i] == null ? '' : fInt(d.total[i])]).filter(r => r[r.length - 1] !== '').reverse(),
+      years.map((y, i) => [y, ...series.map(s => s.vals[i] == null ? '' : s.vals[i]), d.total[i] == null ? '' : d.total[i]]).filter(r => r[r.length - 1] !== '').reverse());
+  }
+  /* 4. family and domestic violence */
+  {
+    const F = V.fdv, off = $('#vi4-off').value, meas = radio('vi4-meas'), d = F.offences[off];
+    const series = [{name: 'Female', color: 'var(--s2)', vals: d.Female[meas]}, {name: 'Male', color: 'var(--s1)', vals: d.Male[meas]}, {name: 'All persons', color: 'var(--ref)', vals: d.Persons[meas]}];
+    $('#vi4-h').textContent = `${off}: family and domestic violence-related victims, Queensland`;
+    $('#vi4-s').textContent = (meas === 'rate' ? 'Victims per 100,000 people of the same sex, as published by ABS. ' : meas === 'n' ? 'Number of victims. ' : 'Family and domestic violence-related victims as a share of all victims of this offence, as published by ABS. ') +
+      'ABS treats an offence as family and domestic violence-related where the recorded relationship is a family or domestic one, or where police have flagged it.' + (off === 'Assault' ? ' Queensland data for assault begin in 2023.' : '');
+    swLegend($('#vi4-leg'), series, true);
+    annualChart($('#vi4-chart'), {years: F.years, series, suffix: meas === 'share' ? '%' : '', aria: `Line chart of family and domestic violence-related ${off} victims in Queensland by sex and year`});
+    simpleTable($('#vi4-tbl'), ['Year', ...series.map(s => s.name)], F.years.map((y, i) => [y, ...series.map(s => s.vals[i] == null ? '' : (meas === 'n' ? fInt(s.vals[i]) : fRate(s.vals[i]) + (meas === 'share' ? '%' : '')))]).filter(r => r.slice(1).some(c => c !== '')).reverse(),
+      F.years.map((y, i) => [y, ...series.map(s => s.vals[i] == null ? '' : s.vals[i])]).filter(r => r.slice(1).some(c => c !== '')).reverse());
+  }
+  /* 5. sexual assault: time to report, and age at incident */
+  {
+    const S = V.sexual_assault, sex = radio('vi5-sex'), share = radio('vi5-meas') === 'share', d = S.report[sex];
+    const short = ['Under 6 months', '6 months to 1 year', '1 to 2 years', '2 to 5 years', '5 to 10 years', '10 to 20 years', '20 years or more'];
+    const series = S.categories.map((c, i) => ({name: short[i], color: `var(--div-${i + 1})`, vals: d[c]}));
+    $('#vi5-s').textContent = (share ? 'Share of sexual assault victims each year' : 'Number of sexual assault victims each year') + ', by how long after the incident it was reported to police. Queensland' + (sex === 'Persons' ? '' : sex === 'Female' ? ', female victims' : ', male victims') + '.';
+    swLegend($('#vi5-leg'), series);
+    stackChart($('#vi5-chart'), {cats: S.years.map(String), series, pct: share, aria: 'Stacked bar chart of time between incident and report for sexual assault victims in Queensland by year'});
+    simpleTable($('#vi5-tbl'), ['Year', ...short, 'Total'], S.years.map((y, i) => [y, ...series.map(s => fInt(s.vals[i] || 0)), fInt(d.Total[i])]).reverse(), S.years.map((y, i) => [y, ...series.map(s => s.vals[i] || 0), d.Total[i]]).reverse());
+    const inc = S.incident[sex] || {}, rep = ((A.profile['Sexual assault'] || {})[sex] || []), bands = A.published_bands.filter(b => inc[b] != null);
+    $('#vi5-ph').textContent = `Sexual assault: age when it happened and age when it was reported, ${A.profile_year}`;
+    $('#vi5-ps').textContent = 'Number of victims by their age at the time of the incident and by their age when it was reported to police. The gap reflects delayed reporting.';
+    swLegend($('#vi5-pleg'), [{name: 'Age at incident', color: 'var(--s7)'}, {name: 'Age at report', color: 'var(--s3)'}]);
+    hbars($('#vi5-prof'), bands.map(b => { const r = rep.find(x => x.band === b); return {label: AGE_LABEL(b), bars: [{v: inc[b], color: 'var(--s7)', text: fInt(inc[b])}, {v: r ? r.n : null, color: 'var(--s3)', text: r ? fInt(r.n) : 'np'}]}; }));
+  }
+  /* 6. latest-year snapshot */
+  {
+    const S = V.snapshot, off = $('#vi6-off').value, grid = $('#vi6-grid'); grid.textContent = '';
+    $('#vi6-h').textContent = `${off}: circumstances and police outcome, ${ly}`;
+    $('#vi6-s').textContent = `Share of ${ly} victims in Queensland, as published by ABS. The number of victims is shown in brackets.`;
+    const panels = [['location', 'Where it happened'], ['weapon', 'Weapon use'], ['outcome', 'Investigation outcome after 30 days']];
+    for (const [key, title] of panels) {
+      const box = el('div', null, el('h3', {style: 'margin:0 0 8px;font-size:14px', text: title})), rowsD = (S[key][off] || []).filter(r => r.lvl >= 0 && !(r.n === 0 && r.lvl >= 1));
+      if (!rowsD.length) box.append(el('p', {class: 'sub', text: 'ABS does not publish this for the selected offence.'}));
+      else { const h = el('div'); hbars(h, rowsD.map(r => ({label: r.label.replace('Investigation finalised - ', 'Finalised: ').replace('Investigation not finalised', 'Not finalised'), sub: r.lvl, bars: [{v: r.pct, color: r.lvl >= 1 ? 'var(--ref)' : 'var(--s1)', text: r.pct == null ? 'np' : `${nf1.format(r.pct)}% (${r.n == null ? 'np' : fInt(r.n)})`}]}))); box.append(h); }
+      grid.append(box);
+    }
+  }
+}
+
 /* ---------- routing & wiring ---------- */
-const VIEWS = ['trends', 'changes', 'map', 'funnel', 'mix', 'about'];
+const VIEWS = ['trends', 'changes', 'map', 'funnel', 'mix', 'victims', 'about'];
 let locCombo;
 function fatal(e) { const f = $('#fatal'); f.hidden = false; f.textContent = (e && e.message ? e.message : String(e)) + '. If you opened this page straight from a folder, serve it through a web server instead (for example: python3 -m http.server).'; }
 function route() {
@@ -1147,7 +1525,7 @@ function route() {
   $$('nav.tabs a').forEach(a => { if (a.dataset.view === v) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   render();
 }
-function render() { if (!META) return; if (state.view === 'trends') renderTrends(); else if (state.view === 'changes') renderChanges(); else if (state.view === 'map') renderMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') { mixCombo.set(locName(state.loc)); renderMix(); } else renderAbout(); }
+function render() { if (!META) return; if (state.view === 'trends') renderTrends(); else if (state.view === 'changes') renderChanges(); else if (state.view === 'map') renderMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') { mixCombo.set(locName(state.loc)); renderMix(); } else if (state.view === 'victims') renderVictims(); else renderAbout(); }
 async function init() {
   try { [META, POP] = await Promise.all([getJSON('meta.json'), getJSON('pop.json')]); } catch (e) { return fatal(e); }
   T = META.months;
@@ -1169,7 +1547,7 @@ async function init() {
   $$('#v-changes select, #v-changes input').forEach(i => i.addEventListener('change', renderChanges));
   $$('#m-meas, #m-win, #m-show, input[name="m-geo"]').forEach(i => i.addEventListener('change', renderMap));
   window.addEventListener('hashchange', route);
-  let rz; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => { if (state.view === 'trends') renderTrends(); else if (state.view === 'map') drawMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') renderMix(); }, 120); }).observe($('main'));
+  let rz; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => { if (state.view === 'trends') renderTrends(); else if (state.view === 'map') drawMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') renderMix(); else if (state.view === 'victims') renderVictims(); }, 120); }).observe($('main'));
   const retheme = () => { if (state.view === 'map' && M.ready) renderMap(); };
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', retheme);
   new MutationObserver(retheme).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
