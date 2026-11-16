@@ -156,6 +156,11 @@ tr.click:hover td{background:var(--accent-wash)}
 .kv dt{color:var(--ink-2)} .kv dd{margin:0;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
 .rank{max-height:330px;overflow:auto;border:1px solid var(--hair);border-radius:8px}
 .about{max-width:76ch}
+.caution-line{margin:0;padding:8px 12px;border-left:4px solid var(--accent);background:var(--accent-wash);border-radius:6px;font-size:13px;color:var(--ink)}
+.callout{border:1px solid var(--accent);border-left:5px solid var(--accent);background:var(--accent-wash);border-radius:10px;padding:14px 18px;margin:0 0 22px}
+.about .callout h2{margin:0 0 6px;font-size:17px;color:var(--ink)}
+.about .callout p,.about .callout li{color:var(--ink)}
+.about .callout ul{margin:6px 0 0;padding-left:20px}
 .about h2{font-size:17px;margin:22px 0 6px}
 .about h2:first-child{margin-top:0}
 .about p,.about li{color:var(--ink-2)}
@@ -252,6 +257,7 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
       <div class="field"><label for="c-min">Minimum offences</label><input type="number" id="c-min" min="0" step="5" value="30"></div>
       <div class="field"><label for="c-n">Rows</label><select id="c-n"><option>15</option><option>30</option><option>60</option></select></div>
     </div>
+    <p class="caution-line"><b>Interpret rates for individual places with caution.</b> Many of the highest rates are in small, remote communities, where a few offences produce a very high rate. <a href="#about">Read the note in About the data</a></p>
     <div class="note" id="c-note"></div>
     <div class="cols">
       <div class="card"><div class="card-head"><div><h2>Largest increases</h2><p class="sub" id="c-s-up"></p></div></div><div id="c-up" style="overflow-x:auto"></div></div>
@@ -275,6 +281,7 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
         <select id="m-show"><option value="rate">Rate per 100,000</option><option value="1">% change on a year earlier</option><option value="5">% change on 5 years earlier</option><option value="10">% change on 10 years earlier</option></select></div>
       <div class="field"><label for="m-find-in">Find a place</label><div class="combo" id="m-find"></div></div>
     </div>
+    <p class="caution-line"><b>Interpret rates for individual places with caution.</b> Many of the highest rates are in small, remote communities, where a few offences produce a very high rate. <a href="#about">Read the note in About the data</a></p>
     <div class="mapgrid">
       <div class="mapbox">
         <canvas id="m-canvas" tabindex="0" aria-label="Map of Queensland coloured by crime rate. Use the ranked list beside the map for the same figures as text."></canvas>
@@ -313,6 +320,7 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
           <input type="radio" name="f-scale" id="f-scale-lin" value="lin"><label for="f-scale-lin">Linear</label>
         </div></div>
     </div>
+    <p class="caution-line"><b>Interpret rates for individual places with caution.</b> Many of the highest rates are in small, remote communities, where a few offences produce a very high rate. <a href="#about">Read the note in About the data</a></p>
     <div class="note" id="f-note"></div>
     <div class="card">
       <div class="card-head"><div><h2 id="f-h">Funnel plot</h2><p class="sub" id="f-s"></p></div></div>
@@ -1068,7 +1076,22 @@ function renderAbout() {
   const link = (t, u) => el('a', {href: u, target: '_blank', rel: 'noopener', text: t});
   const li = (...k) => { const e = el('li'); e.append(...k); return e; };
   const B = t => el('b', {text: t});
+  const small = el('span');
+  const caution = el('div', {class: 'callout', role: 'note'},
+    H('Interpret rates for individual places with caution'),
+    P('Rates for a single local government area or police division can mislead if read on their own.'),
+    el('ul', null,
+      li(B('Many of the places with the highest rates are small, remote communities. '), small, 'Where few people live, a small number of offences, or of people offending, produces a very high rate and large changes from one year to the next.'),
+      li(B('Many of these communities also experience high levels of socio-economic disadvantage. '), 'Six of the ten most disadvantaged local government areas in Australia are in Queensland, according to the ', link('ABS Socio-Economic Indexes for Areas (SEIFA) 2021', 'https://www.abs.gov.au/statistics/people/people-and-communities/socio-economic-indexes-areas-seifa-australia/2021'), '.'),
+      li(B('A rate is not an explanation. '), 'It describes offences recorded by police relative to the number of residents. It does not show why a rate is high or low, and it is not a judgement about a community or the people who live there.'),
+      li(B('Use local context. '), 'Rates should be read alongside what is known about a place, and should not be used on their own to rank or label communities.')));
+  getSummary().then(S => {
+    const top = META.lgas.map((_, i) => ({r: S.p_l[i][0] > 0 ? S.c_l[0][i][0] / S.p_l[i][0] : 0, p: S.p_l[i][0]})).sort((a, b) => b.r - a.r).slice(0, 10);
+    const n = top.filter(d => d.p < 5000).length, words = ['None', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'All ten'];
+    small.textContent = `${n === 10 ? 'All ten' : words[n] + ' of the ten'} local government areas with the highest rate of ${META.offences[0].name.toLowerCase()} in the latest 12 months ${n === 1 ? 'has' : 'have'} fewer than 5,000 residents. `;
+  }).catch(() => {});
   h.append(
+    caution,
     H('About this site'),
     P(`This site shows how crime recorded by police in Queensland has changed since January ${META.start_year}. You can look at Queensland as a whole, any of its ${META.lgas.length} local government areas (council areas), or any of ${META.divisions.length} police divisions, for ${META.offences.length} types of offence.`),
     P('It is built entirely from data sets that the Queensland Police Service (QPS) and the Australian Bureau of Statistics (ABS) publish for anyone to use. It is an independent analysis of those data and is not a QPS or ABS product.'),
@@ -1087,7 +1110,7 @@ function renderAbout() {
       li(B('Recorded crime only. '), 'The figures count offences reported to, or detected by, police. Offences that never come to police attention are not included.'),
       li(B('Offender figures are not a count of people. '), 'QPS counts an offender each time an offence is cleared through action against a person, so one person can be counted more than once.'),
       li(B('Adults and juveniles. '), 'QPS counts only people aged 10 and over. Juveniles are aged 10 to 17, and adults are 18 and over. Before 12 February 2018, 17-year-olds were counted as adults, which causes a step in both series at that date.'),
-      li(B('Small places. '), 'Where few people live, a handful of offences can move the rate a long way. Treat large swings in small communities with caution.'),
+      li(B('Small places. '), 'Where few people live, a handful of offences can move the rate a long way. See the note at the top of this page before comparing places.'),
       li(B('Residents, not visitors. '), 'Rates are based on the number of people who live in an area. Places with many visitors or workers compared with residents can show high rates for that reason.'),
       li(B('Seasons. '), 'Recorded crime rises and falls through the year. The rolling 12-month view removes that pattern and is the better guide to the underlying trend. QPS advises care when comparing one month with the next.'),
       li(B('No adjustment for who lives there. '), 'Rates are not adjusted for the age profile or other characteristics of an area.')),
@@ -1119,6 +1142,7 @@ function fatal(e) { const f = $('#fatal'); f.hidden = false; f.textContent = (e 
 function route() {
   const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'trends';
   state.view = v;
+  if (v === 'about') window.scrollTo(0, 0);
   VIEWS.forEach(n => { $('#v-' + n).hidden = n !== v; });
   $$('nav.tabs a').forEach(a => { if (a.dataset.view === v) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   render();
