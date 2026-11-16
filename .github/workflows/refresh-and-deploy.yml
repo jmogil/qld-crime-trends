@@ -1,0 +1,75 @@
+# Deploys the dashboard to GitHub Pages.
+# - On every push to main: publish the site as it is in the repository.
+# - On the 20th of each month (and when run by hand): download the latest QPS files,
+#   rebuild data/, commit the result, then publish.
+name: Refresh data and deploy
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 1 20 * *"   # 01:17 UTC on the 20th = 11:17 am Brisbane
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        if: github.event_name != 'push'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download QPS files and rebuild the data
+        if: github.event_name != 'push'
+        run: |
+          pip install pandas numpy openpyxl
+          mkdir -p raw
+          cp source-files/* raw/
+          python build_data.py --raw raw --out data --download-qps --report refresh_report.md
+
+      - name: Commit the refreshed data
+        if: github.event_name != 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data refresh_report.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Refresh data ($(date -u +%Y-%m-%d))"
+            git push
+          fi
+
+      - name: Assemble the site
+        run: |
+          mkdir _site
+          cp -r index.html data .nojekyll _site/
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
