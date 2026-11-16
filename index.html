@@ -1062,38 +1062,54 @@ async function renderMix() {
 function renderAbout() {
   const h = $('#about-body'); if (h.childNodes.length) return;
   const latest = monthLabel(T - 1);
-  const P = (t) => el('p', {text: t}), H = t => el('h2', {text: t});
+  const FULLMON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const b = META.built.split('-'), builtText = `${+b[2]} ${FULLMON[+b[1] - 1]} ${b[0]}`;
+  const P = (...k) => { const e = el('p'); e.append(...k); return e; }, H = t => el('h2', {text: t});
   const link = (t, u) => el('a', {href: u, target: '_blank', rel: 'noopener', text: t});
   const li = (...k) => { const e = el('li'); e.append(...k); return e; };
-  h.append(H('What this shows'),
-    P(`Monthly counts of offences reported to the Queensland Police Service (QPS) and of offenders, from January ${META.start_year} to ${latest}, converted to rates per 100,000 population. Figures are available for Queensland, ${META.lgas.length} local government areas (LGAs) and ${META.divisions.length} police divisions. QPS does not publish these data by SA2; the police division is the smallest area released for offences, and the LGA is the smallest for offenders.`),
-    H('Sources'),
+  const B = t => el('b', {text: t});
+  h.append(
+    H('About this site'),
+    P(`This site shows how crime recorded by police in Queensland has changed since January ${META.start_year}. You can look at Queensland as a whole, any of its ${META.lgas.length} local government areas (council areas), or any of ${META.divisions.length} police divisions, for ${META.offences.length} types of offence.`),
+    P('It is built entirely from data sets that the Queensland Police Service (QPS) and the Australian Bureau of Statistics (ABS) publish for anyone to use. It is an independent analysis of those data and is not a QPS or ABS product.'),
+    H('How often it is updated'),
+    P(`The data are refreshed every month. This version covers January ${META.start_year} to ${latest} and was last updated on ${builtText}.`),
+    H('What you can do here'),
     el('ul', null,
-      li(link('QPS Maps and statistics', 'https://www.police.qld.gov.au/maps-and-statistics'), ': reported offences (number and rate) for Queensland, LGAs and police divisions; reported offenders (number) by adult or juvenile status and sex for Queensland and LGAs; police division boundaries.'),
-      li(link('ABS National, state and territory population', 'https://www.abs.gov.au/statistics/people/population/national-state-and-territory-population/latest-release'), `, Table 53: estimated resident population (ERP) by single year of age, Queensland, at 30 June each year to ${META.abs_last_june}.`),
-      li(link('ABS Regional population by age and sex', 'https://www.abs.gov.au/statistics/people/population/regional-population-age-and-sex/latest-release'), `: ERP by five-year age group for LGAs, 30 June ${META.start_year} to ${META.abs_lga_last_june}.`),
-      li(link('ABS digital boundary files', 'https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs-edition-3/jul2021-jun2026/access-and-downloads/digital-boundary-files'), ': LGA boundaries (ASGS Edition 3, 2025).')),
-    H('How the rates are calculated'),
+      li(B('Trends: '), 'choose a crime type and a place to see how the rate has moved over time, including separate rates for adult and juvenile offenders and for males and females.'),
+      li(B('Biggest changes: '), 'see which combinations of crime type and place have risen or fallen the most.'),
+      li(B('Map: '), 'compare rates across Queensland, or search for a place.'),
+      li(B('Funnel plot: '), 'see which areas sit well above or below the Queensland rate once the size of their population is taken into account.'),
+      li(B('Offence mix: '), 'see how the make-up of recorded crime in a place has shifted over time.')),
+    H('Understanding the numbers'),
     el('ul', null,
-      li(el('b', {text: 'Offence rates '}), 'use the population QPS itself uses. QPS publishes each offence count alongside a rate per 100,000 persons, so the population behind every area and month is recovered as count ÷ rate × 100,000. Monthly rates here therefore reproduce the published QPS rates, to within rounding of the population.'),
-      li(el('b', {text: 'Rolling 12-month rates '}), 'are the total over the 12 months ending in the month shown, divided by the average population over those months. They are annual rates and remove seasonal swings. QPS advises that month-to-month comparisons be read with care because of seasonality.'),
-      li(el('b', {text: 'Offender rates '}), 'divide QPS offender counts by ABS population in the matching age group: juveniles per 100,000 people aged 10–17, adults per 100,000 people aged 18 and over, and all offenders per 100,000 people aged 10 and over. QPS counts only persons aged 10 and over.'),
-      li(el('b', {text: 'Juvenile definition. '}), 'QPS states that juveniles are aged 10–17 from 12 February 2018 and were aged 10–16 before then. The denominators follow the same rule: 10–16 and 17+ to January 2018, 10–17 and 18+ from February 2018. The step in the juvenile and adult series at that date reflects the change in who is counted.'),
-      li(el('b', {text: 'LGA age groups. '}), 'ABS publishes LGA populations in five-year age groups. The 15–19 group is split between juveniles and adults using the Queensland-wide share of that group aged 15–16 (or 15–17) in the same year. This is an approximation for LGAs whose age profile within 15–19 differs from the State’s, such as those with boarding schools or universities.'),
-      li(el('b', {text: 'Between and beyond 30 June estimates. '}), `ABS age estimates are for 30 June each year. Monthly values are linearly interpolated, and months after June ${META.abs_last_june} are extrapolated at the latest annual rate of change until ABS releases the next estimates.`)),
-    H('Sex, funnel plot and offence mix'),
+      li(B('Rates, not counts. '), 'Figures are shown per 100,000 people so that places with different populations can be compared fairly.'),
+      li(B('Recorded crime only. '), 'The figures count offences reported to, or detected by, police. Offences that never come to police attention are not included.'),
+      li(B('Offender figures are not a count of people. '), 'QPS counts an offender each time an offence is cleared through action against a person, so one person can be counted more than once.'),
+      li(B('Adults and juveniles. '), 'QPS counts only people aged 10 and over. Juveniles are aged 10 to 17, and adults are 18 and over. Before 12 February 2018, 17-year-olds were counted as adults, which causes a step in both series at that date.'),
+      li(B('Small places. '), 'Where few people live, a handful of offences can move the rate a long way. Treat large swings in small communities with caution.'),
+      li(B('Residents, not visitors. '), 'Rates are based on the number of people who live in an area. Places with many visitors or workers compared with residents can show high rates for that reason.'),
+      li(B('Seasons. '), 'Recorded crime rises and falls through the year. The rolling 12-month view removes that pattern and is the better guide to the underlying trend. QPS advises care when comparing one month with the next.'),
+      li(B('No adjustment for who lives there. '), 'Rates are not adjusted for the age profile or other characteristics of an area.')),
+    H('Where the data come from'),
     el('ul', null,
-      li(el('b', {text: 'Offender rates by sex '}), 'divide male and female offender counts by the ABS population of the same sex and age group, built the same way as the all-persons denominators. QPS records some offenders with sex not stated; they are counted under all persons only, so male and female counts can add to slightly less than the total.'),
-      li(el('b', {text: 'Funnel plot. '}), 'Each area\u2019s rate for a 12-month period is plotted against its population, with the Queensland rate as the centre line and 95% and 99.8% control limits, following ', link('Spiegelhalter (2005), Funnel plots for comparing institutional performance, Statistics in Medicine', 'https://doi.org/10.1002/sim.1970'), '. Limits use a square-root transformation of the Poisson count: z = 2(\u221Aobserved \u2212 \u221Aexpected), where expected is the count at the Queensland rate. The adjusted option estimates an overdispersion factor \u03C6 as the mean squared z-score after winsorising the top and bottom 10% of z-scores, and widens the limits by \u221A\u03C6. Rates are crude, with no adjustment for age structure or other area characteristics.'),
-      li(el('b', {text: 'Offence mix '}), 'shows each category\u2019s share of the offences in its parent group, or the stacked rate, for each 12 months ending in the latest month of data. QPS does not publish a total across all offences, so the all-offences view is the sum of the three offence divisions. Where a group has more than seven categories, the seven largest statewide are shown and the rest are combined.')),
-    H('Reading the figures'),
+      li(link('Queensland Police Service, Maps and statistics', 'https://www.police.qld.gov.au/maps-and-statistics'), ': reported offences for Queensland, local government areas and police divisions; reported offenders by age group and sex for Queensland and local government areas; police division boundaries.'),
+      li(link('ABS, National, state and territory population', 'https://www.abs.gov.au/statistics/people/population/national-state-and-territory-population/latest-release'), `: Queensland population by single year of age and sex, at 30 June each year to ${META.abs_last_june}.`),
+      li(link('ABS, Regional population by age and sex', 'https://www.abs.gov.au/statistics/people/population/regional-population-age-and-sex/latest-release'), `: population of each local government area by age group and sex, 30 June ${META.start_year} to ${META.abs_lga_last_june}.`),
+      li(link('ABS, digital boundary files', 'https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs-edition-3/jul2021-jun2026/access-and-downloads/digital-boundary-files'), ': local government area boundaries (2025).')),
+    P('Police divisions are the smallest areas for which QPS publishes offence counts. Offender counts are published for Queensland and local government areas only, so offender rates are not available for police divisions.'),
+    H('Method in detail'),
+    P('For readers who want the technical detail.'),
     el('ul', null,
-      li('Offender figures count offences cleared through action against an offender. QPS notes this is not a count of unique people, and it does not equal the number of offences cleared.'),
-      li('Rates in areas with small populations move sharply with a few offences. The biggest-changes view lets you set a minimum number of offences, and the trend view flags areas with fewer than 5,000 residents.'),
-      li('Police division boundaries are the current QPS boundaries. Map shapes are simplified for display and are not survey-accurate.'),
-      li('Offender counts for the most recent months may rise in later QPS releases as more offences are cleared.', el('span', {class: 'tag', text: ' (Unsourced caution: this follows from how clearance data accrue and is not stated on the QPS page.)'}))),
-    H('Updating'),
-    P(`Data in this copy were downloaded and built on ${META.built} and run to ${latest}. QPS updates its files monthly. To refresh, re-run the build script supplied with the site files. The same script writes long-format analysis files (counts, denominators and rates by location, offence and month) for use outside the dashboard.`));
+      li(B('Offence rates '), 'use the population QPS itself uses. QPS publishes each offence count alongside a rate per 100,000 persons, so the population behind every area and month is recovered as count ÷ rate × 100,000. Monthly rates here therefore reproduce the published QPS rates, to within rounding of the population.'),
+      li(B('Rolling 12-month rates '), 'are the total over the 12 months ending in the month shown, divided by the average population over those months. They are annual rates.'),
+      li(B('Offender rates '), 'divide QPS offender counts by ABS estimated resident population in the matching age group: juveniles per 100,000 people aged 10–17, adults per 100,000 people aged 18 and over, and all offenders per 100,000 people aged 10 and over. Denominators follow the QPS definition in force each month: 10–16 and 17+ to January 2018, 10–17 and 18+ from February 2018.'),
+      li(B('Rates by sex '), 'divide male and female offender counts by the population of the same sex and age group. QPS records some offenders with sex not stated; they are counted under all persons only, so male and female counts can add to slightly less than the total.'),
+      li(B('Local government area age groups. '), 'ABS publishes these populations in five-year age groups. The 15–19 group is split between juveniles and adults using the Queensland-wide share of that group aged 15–16 (or 15–17) in the same year and of the same sex. This is an approximation for areas whose age profile within 15–19 differs from the State’s, such as those with boarding schools or universities.'),
+      li(B('Between and beyond 30 June estimates. '), `ABS age estimates are for 30 June each year. Monthly values are linearly interpolated, and months after June ${META.abs_last_june} are extrapolated at the latest annual rate of change until ABS releases its next estimates.`),
+      li(B('Funnel plot. '), 'Each area’s rate for a 12-month period is plotted against its population, with the Queensland rate as the centre line and 95% and 99.8% control limits, following ', link('Spiegelhalter (2005), Funnel plots for comparing institutional performance, Statistics in Medicine', 'https://doi.org/10.1002/sim.1970'), '. Limits use a square-root transformation of the Poisson count: z = 2(√observed − √expected), where expected is the count at the Queensland rate. The adjusted option estimates an overdispersion factor φ as the mean squared z-score after winsorising the top and bottom 10% of z-scores, and widens the limits by √φ.'),
+      li(B('Offence mix '), 'shows each category’s share of the offences in its parent group, or the stacked rate, for each 12 months ending in the latest month of data. QPS does not publish a total across all offences, so the all-offences view is the sum of the three QPS offence divisions. Where a group has more than seven categories, the seven largest statewide are shown and the rest are combined.'),
+      li(B('Boundaries. '), 'Police division boundaries are the current QPS boundaries. Map shapes are simplified for display and are not survey-accurate.')));
 }
 
 /* ---------- routing & wiring ---------- */
