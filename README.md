@@ -1,11 +1,11 @@
-# Queensland crime trends
+# Queensland crime trends <img src="assets/readme-hex.svg" align="right" width="150" alt="Queensland crime trends hex logo" />
 
 An interactive dashboard of reported offences and offenders in Queensland, per 100,000 population,
 by crime type and location. Built from publicly available Queensland Police Service (QPS) and
 Australian Bureau of Statistics (ABS) data sets.
 
 Views: Trends (offence rate; adult and juvenile offender rates, by sex), Biggest changes, Map,
-Funnel plot (areas against the Queensland rate), Offence mix, and About the data (sources and method).
+Funnel plot (areas against the Queensland rate), Offence mix, Victims (ABS, annual), and About the data (sources and method).
 
 ## How this repository works
 
