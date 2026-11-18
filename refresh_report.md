@@ -1,6 +1,6 @@
 # Queensland crime data refresh: data to Oct 2026
 
-Built 2026-11-16. Series run from Jan 2001; 310 months.
+Built 2026-11-18. Series run from Jan 2001; 310 months.
 
 ## Queensland, main categories
 

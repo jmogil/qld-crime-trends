@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Map classes use the viridis palette (same steps in light and dark themes): --seq-* = viridis(6), --div-* = viridis(7). */
+/* Map classes: --seq-* = single-hue burgundy (CARTOColors Burg, light = low, dark = high, same in both themes); --div-* = ColorBrewer RdBu with a grey midpoint (blue = decrease, red = increase); --ord-* = Burg(7) for ordered categories. */
 /* Layout idea: one working surface per question (trend, biggest changes, map), filters in a single row above what they scope. */
 :root{
   color-scheme:light;
@@ -20,8 +20,8 @@
   --accent:#7d1d3f; --accent-ink:#ffffff; --accent-wash:#f6e9ee;
   --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948; --ref:#a39a9b;
   --inc:#cf3c3b; --dec:#256abf;
-  --seq-1:#440154; --seq-2:#414487; --seq-3:#2a788e; --seq-4:#22a884; --seq-5:#7ad151; --seq-6:#fde725;
-  --div-1:#440154; --div-2:#443a83; --div-3:#31688e; --div-4:#21908c; --div-5:#35b779; --div-6:#8fd744; --div-7:#fde725;
+  --seq-1:#ffc6c4; --seq-2:#f4a3a8; --seq-3:#e38191; --seq-4:#cc607d; --seq-5:#ad466c; --seq-6:#672044; --sei-1:#d1eeea; --sei-2:#a8dbd9; --sei-3:#68abb8; --sei-4:#3b738f; --sei-5:#2a5674; --ord-1:#ffc6c4; --ord-2:#f4a3a8; --ord-3:#e38191; --ord-4:#cc607d; --ord-5:#ad466c; --ord-6:#8b3058; --ord-7:#672044;
+  --div-1:#2166ac; --div-2:#67a9cf; --div-3:#d1e5f0; --div-4:#d6d3d2; --div-5:#fddbc7; --div-6:#ef8a62; --div-7:#b2182b;
   --nodata:#e6e1df;
   --font:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
@@ -33,8 +33,8 @@
     --accent:#e58aa6; --accent-ink:#1c0d13; --accent-wash:#33202a;
     --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#0ca30c; --s7:#9085e9; --s8:#e66767; --ref:#6f6869;
     --inc:#e66767; --dec:#5598e7;
-    --seq-1:#440154; --seq-2:#414487; --seq-3:#2a788e; --seq-4:#22a884; --seq-5:#7ad151; --seq-6:#fde725;
-    --div-1:#440154; --div-2:#443a83; --div-3:#31688e; --div-4:#21908c; --div-5:#35b779; --div-6:#8fd744; --div-7:#fde725;
+    --seq-1:#ffc6c4; --seq-2:#f4a3a8; --seq-3:#e38191; --seq-4:#cc607d; --seq-5:#ad466c; --seq-6:#672044; --sei-1:#d1eeea; --sei-2:#a8dbd9; --sei-3:#68abb8; --sei-4:#3b738f; --sei-5:#2a5674; --ord-1:#ffc6c4; --ord-2:#f4a3a8; --ord-3:#e38191; --ord-4:#cc607d; --ord-5:#ad466c; --ord-6:#8b3058; --ord-7:#672044;
+    --div-1:#2166ac; --div-2:#67a9cf; --div-3:#d1e5f0; --div-4:#5b5657; --div-5:#fddbc7; --div-6:#ef8a62; --div-7:#b2182b;
     --nodata:#2a2627;
   }
 }
@@ -45,8 +45,8 @@
   --accent:#e58aa6; --accent-ink:#1c0d13; --accent-wash:#33202a;
   --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#0ca30c; --s7:#9085e9; --s8:#e66767; --ref:#6f6869;
   --inc:#e66767; --dec:#5598e7;
-  --seq-1:#440154; --seq-2:#414487; --seq-3:#2a788e; --seq-4:#22a884; --seq-5:#7ad151; --seq-6:#fde725;
-  --div-1:#440154; --div-2:#443a83; --div-3:#31688e; --div-4:#21908c; --div-5:#35b779; --div-6:#8fd744; --div-7:#fde725;
+  --seq-1:#ffc6c4; --seq-2:#f4a3a8; --seq-3:#e38191; --seq-4:#cc607d; --seq-5:#ad466c; --seq-6:#672044; --sei-1:#d1eeea; --sei-2:#a8dbd9; --sei-3:#68abb8; --sei-4:#3b738f; --sei-5:#2a5674; --ord-1:#ffc6c4; --ord-2:#f4a3a8; --ord-3:#e38191; --ord-4:#cc607d; --ord-5:#ad466c; --ord-6:#8b3058; --ord-7:#672044;
+  --div-1:#2166ac; --div-2:#67a9cf; --div-3:#d1e5f0; --div-4:#5b5657; --div-5:#fddbc7; --div-6:#ef8a62; --div-7:#b2182b;
   --nodata:#2a2627;
 }
 *{box-sizing:border-box}
@@ -70,6 +70,10 @@ nav.tabs{display:flex;gap:2px;flex-wrap:wrap}
 nav.tabs a{padding:9px 14px 11px;text-decoration:none;color:var(--ink-2);font-weight:600;border-bottom:3px solid transparent;border-radius:6px 6px 0 0}
 nav.tabs a:hover{background:var(--wash);color:var(--ink)}
 nav.tabs a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+nav.tabs .reset{align-self:center;margin-left:8px;padding:5px 12px;font:inherit;font-size:13px;font-weight:600;color:var(--ink-2);background:transparent;border:1px solid var(--hair);border-radius:999px;cursor:pointer}
+nav.tabs .reset::before{content:"\21BA";margin-right:6px;font-size:14px}
+nav.tabs .reset:hover{color:var(--accent);border-color:var(--accent)}
+nav.tabs .reset:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 main{padding:18px 0 40px}
 .view{display:flex;flex-direction:column;gap:14px}
 .filters{display:flex;flex-wrap:wrap;gap:12px 14px;align-items:flex-end}
@@ -167,10 +171,11 @@ tr.click:hover td{background:var(--accent-wash)}
 .hb-row.sub .hb-lab{padding-left:14px;color:var(--ink-2)}
 .hb-row.sub2 .hb-lab{padding-left:28px}
 .hb-bars{display:grid;gap:2px}
-.hb-bar{display:grid;grid-template-columns:1fr 112px;gap:8px;align-items:center}
+.hb-bar{display:grid;grid-template-columns:1fr minmax(112px,auto);gap:8px;align-items:center}
 .hb-track{height:12px}
 .hb-track i{display:block;height:100%;border-radius:0 4px 4px 0}
 .hb-val{font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+#s-fifths .hb-val{white-space:normal;max-width:190px}
 #v-victims .card h3{margin:0 0 8px;font-size:14px}
 .caution-line{margin:0;padding:8px 12px;border-left:4px solid var(--accent);background:var(--accent-wash);border-radius:6px;font-size:13px;color:var(--ink)}
 .callout{border:1px solid var(--accent);border-left:5px solid var(--accent);background:var(--accent-wash);border-radius:10px;padding:14px 18px;margin:0 0 22px}
@@ -186,7 +191,8 @@ tr.click:hover td{background:var(--accent-wash)}
 footer{color:var(--muted);font-size:12px;padding:0 0 30px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media (max-width:520px){
-#v-victims .seg label{padding:0 6px;font-size:12px}
+#v-victims .seg label,#v-trends .seg label,#v-seifa .seg label{padding:0 6px;font-size:12px}
+#v-trends .seg,#v-seifa .seg{flex-wrap:wrap}
 .hb-row{grid-template-columns:minmax(80px,112px) 1fr}
 .hb-bar{grid-template-columns:1fr 92px}
 .f-off select,.combo{width:100%}.field{flex:1 1 100%}.mapbox canvas{height:440px}}
@@ -198,7 +204,7 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
     <div class="brand">
       <img class="logo" src="assets/logo.svg" width="58" height="67" alt="">
       <h1>Queensland crime trends</h1>
-      <p id="tagline">Reported offences and offenders per 100,000 population, by crime type and location</p>
+      <p id="tagline">Reported offences, offenders and victims per 100,000 population, by crime type and location</p>
       <p class="prov">Based on publicly available data sets from the Queensland Police Service (QPS) and the Australian Bureau of Statistics (ABS). <a href="#about">Sources and method</a></p>
     </div>
     <nav class="tabs" aria-label="Views">
@@ -207,8 +213,10 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
       <a href="#map" data-view="map">Map</a>
       <a href="#funnel" data-view="funnel">Funnel plot</a>
       <a href="#mix" data-view="mix">Offence mix</a>
+      <a href="#seifa" data-view="seifa">Disadvantage</a>
       <a href="#victims" data-view="victims">Victims</a>
       <a href="#about" data-view="about">About the data</a>
+      <button type="button" id="reset" class="reset" title="Back to Queensland, offences against the person, offence rate">Reset</button>
     </nav>
   </div>
 </header>
@@ -263,13 +271,32 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
       <div class="chart" id="t-chart2"></div>
       <details class="tbl" id="t-tbl2"><summary>Show as table</summary><div class="tblbody"></div></details>
     </div>
+    <div class="card" id="t-card3">
+      <div class="card-head">
+        <div><h2 id="t-h3">Victim rate</h2><p class="sub" id="t-s3"></p></div>
+        <div style="display:flex;gap:6px 14px;flex-wrap:wrap;align-items:center" id="t-vctl">
+          <label class="check"><input type="checkbox" id="t-va" checked> Adult (18+)</label>
+          <label class="check"><input type="checkbox" id="t-vj" checked> Juvenile (0&ndash;17)</label>
+          <label class="check"><input type="checkbox" id="t-vall"> All ages</label>
+          <div class="seg" role="radiogroup" aria-label="Sex of victim">
+            <input type="radio" name="t-vsex" id="t-vsex-p" value="p" checked><label for="t-vsex-p">All persons</label>
+            <input type="radio" name="t-vsex" id="t-vsex-m" value="m"><label for="t-vsex-m">Male</label>
+            <input type="radio" name="t-vsex" id="t-vsex-f" value="f"><label for="t-vsex-f">Female</label>
+            <input type="radio" name="t-vsex" id="t-vsex-mf" value="mf"><label for="t-vsex-mf">Male and female</label>
+          </div>
+        </div>
+      </div>
+      <div class="legend" id="t-leg3"></div>
+      <div class="chart" id="t-chart3"></div>
+      <details class="tbl" id="t-tbl3"><summary>Show as table</summary><div class="tblbody"></div></details>
+    </div>
   </section>
 
   <!-- ===================== CHANGES ===================== -->
   <section id="v-changes" class="view" hidden>
     <div class="filters">
       <div class="field"><label for="c-meas">Rate</label>
-        <select id="c-meas"><option value="off">Offence rate</option><option value="adult">Adult offender rate</option><option value="juv">Juvenile offender rate</option></select></div>
+        <select id="c-meas"><option value="off">Offence rate</option><option value="adult">Adult offender rate</option><option value="juv">Juvenile offender rate</option><option value="vic">Victim rate</option><option value="vadult">Adult victim rate</option><option value="vjuv">Juvenile victim rate (aged 0&ndash;17)</option></select></div>
       <div class="field"><label for="c-geo">Locations</label>
         <select id="c-geo"><option value="l">Local government areas</option><option value="d">Police divisions</option><option value="ld">LGAs and police divisions</option><option value="q">Queensland (statewide)</option></select></div>
       <div class="field f-off"><label for="c-off">Crime types</label><select id="c-off"></select></div>
@@ -291,8 +318,8 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
   <section id="v-map" class="view" hidden>
     <div class="filters">
       <div class="field f-off"><label for="m-off">Crime type</label><select id="m-off" class="offsel"></select></div>
-      <div class="field"><label for="m-meas">Rate</label>
-        <select id="m-meas"><option value="off">Offence rate</option><option value="adult">Adult offender rate</option><option value="juv">Juvenile offender rate</option><option value="all">Offender rate, all aged 10+</option></select></div>
+      <div class="field"><label for="m-meas">Show</label>
+        <select id="m-meas"><optgroup label="Crime rates"><option value="off">Offence rate</option><option value="adult">Adult offender rate</option><option value="juv">Juvenile offender rate</option><option value="all">Offender rate, all aged 10+</option><option value="vic">Victim rate</option><option value="vadult">Adult victim rate</option><option value="vjuv">Juvenile victim rate (aged 0&ndash;17)</option></optgroup><optgroup label="Disadvantage (ABS SEIFA 2021)"><option value="seifa-0">IRSD: relative socio-economic disadvantage</option><option value="seifa-1">IRSAD: relative advantage and disadvantage</option><option value="seifa-2">IER: economic resources</option><option value="seifa-3">IEO: education and occupation</option></optgroup></select></div>
       <div class="field"><span class="lab">Areas</span>
         <div class="seg" role="radiogroup" aria-label="Areas">
           <input type="radio" name="m-geo" id="m-geo-d" value="d" checked><label for="m-geo-d">Police divisions</label>
@@ -324,7 +351,7 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
     <div class="filters">
       <div class="field f-off"><label for="f-off">Crime type</label><select id="f-off" class="offsel"></select></div>
       <div class="field"><label for="f-meas">Rate</label>
-        <select id="f-meas"><option value="off">Offence rate</option><option value="adult">Adult offender rate</option><option value="juv">Juvenile offender rate</option><option value="all">Offender rate, all aged 10+</option></select></div>
+        <select id="f-meas"><option value="off">Offence rate</option><option value="adult">Adult offender rate</option><option value="juv">Juvenile offender rate</option><option value="all">Offender rate, all aged 10+</option><option value="vic">Victim rate</option><option value="vadult">Adult victim rate</option><option value="vjuv">Juvenile victim rate (aged 0&ndash;17)</option></select></div>
       <div class="field"><span class="lab">Areas</span>
         <div class="seg" role="radiogroup" aria-label="Areas">
           <input type="radio" name="f-geo" id="f-geo-l" value="l" checked><label for="f-geo-l">LGAs</label>
@@ -383,8 +410,54 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
 
   <!-- ===================== ABOUT ===================== -->
   <!-- ===================== VICTIMS ===================== -->
+  <section id="v-seifa" class="view" hidden>
+    <div class="filters">
+      <div class="field f-off"><label for="s-off">Crime type</label><select id="s-off" class="offsel"></select></div>
+      <div class="field"><label for="s-meas">Rate</label>
+        <select id="s-meas"><option value="off">Offence rate</option><option value="adult">Adult offender rate</option><option value="juv">Juvenile offender rate</option><option value="all">Offender rate, all aged 10+</option><option value="vic">Victim rate</option><option value="vadult">Adult victim rate</option><option value="vjuv">Juvenile victim rate (aged 0&ndash;17)</option></select></div>
+      <div class="field"><label for="s-idx">SEIFA index</label>
+        <select id="s-idx"><option value="0">IRSD: relative socio-economic disadvantage</option><option value="1">IRSAD: relative advantage and disadvantage</option><option value="2">IER: economic resources</option><option value="3">IEO: education and occupation</option></select></div>
+      <div class="field"><span class="lab">Areas</span><div class="seg" role="radiogroup" aria-label="Areas">
+        <input type="radio" name="s-geo" id="s-geo-l" value="l" checked><label for="s-geo-l">LGAs</label>
+        <input type="radio" name="s-geo" id="s-geo-d" value="d"><label for="s-geo-d">Police divisions</label></div></div>
+      <div class="field"><label for="s-win">12 months to</label><select id="s-win"></select></div>
+    </div>
+    <p class="caution-line"><b>Interpret rates for individual places with caution.</b> Many of the highest rates are in small, remote communities, where a few offences produce a very high rate. These charts show how rates and disadvantage go together across areas; they do not show that disadvantage causes crime, or that individual residents of disadvantaged areas offend. <a href="#about">Read the note in About the data</a></p>
+    <div class="card">
+      <div class="card-head"><div><h2 id="s-h"></h2><p class="sub" id="s-s"></p></div>
+        <div class="seg" role="radiogroup" aria-label="Rate axis"><input type="radio" name="s-scale" id="s-scale-log" value="log" checked><label for="s-scale-log">Log</label><input type="radio" name="s-scale" id="s-scale-lin" value="lin"><label for="s-scale-lin">Linear</label></div></div>
+      <div class="legend" id="s-leg"></div>
+      <div class="chart" id="s-chart"></div>
+      <p class="sub" id="s-stat" style="margin-top:6px"></p>
+    </div>
+    <div class="cols">
+      <div class="card"><h2 id="s-h2">Rate by fifth of the population</h2><p class="sub" id="s-s2"></p><div id="s-fifths"></div></div>
+      <div class="card"><h2>All four indexes</h2><p class="sub" id="s-s3"></p><div id="s-corr"></div></div>
+    </div>
+    <details class="tbl card" id="s-tbl"><summary>Show areas as a table</summary><div class="tblbody"></div></details>
+  </section>
+
   <section id="v-victims" class="view" hidden>
-    <p class="caution-line" id="vi-intro"><b>These figures come from a different source.</b> The Victims tab uses annual Australian Bureau of Statistics counts of victims for Queensland as a whole. They are counted differently from the police offence figures on the other tabs, so the numbers will not match. <a href="#about">Read more in About the data</a></p>
+    <p class="caution-line" id="vi-intro"><b>This tab uses two sources.</b> The first section uses monthly Queensland Police Service counts of victims for Queensland and each local government area. The sections below use annual Australian Bureau of Statistics counts for Queensland as a whole, which add age detail, relationship to the offender, family and domestic violence and more. The two are counted differently and will not match each other or the offence figures on other tabs. <a href="#about">Read more in About the data</a></p>
+
+    <div class="card" id="vi-q">
+      <div class="card-head">
+        <div><h2 id="viq-h">Victims by crime type and place</h2><p class="sub" id="viq-s"></p></div>
+        <div class="filters">
+          <div class="field f-loc"><label for="viq-loc-in">Location</label><div class="combo" id="viq-loc"></div></div>
+          <div class="field"><span class="lab">Show</span><div class="seg" role="radiogroup" aria-label="Show">
+            <input type="radio" name="viq-meas" id="viq-rate" value="rate" checked><label for="viq-rate">Rate per 100,000</label>
+            <input type="radio" name="viq-meas" id="viq-num" value="n"><label for="viq-num">Number</label></div></div>
+        </div>
+      </div>
+      <div class="cols" id="viq-grid">
+        <div><h3 id="viq-h1"></h3><p class="sub" id="viq-s1"></p><div id="viq-off"></div></div>
+        <div><h3 id="viq-h2"></h3><p class="sub" id="viq-s2"></p>
+          <div class="field" style="margin:4px 0 6px"><label for="viq-o">Crime type</label><select id="viq-o"></select></div>
+          <div class="legend" id="viq-leg"></div><div id="viq-age"></div>
+          <p class="sub" style="margin-top:10px"><a href="#trends" id="viq-go">See this as a trend over time</a></p></div>
+      </div>
+    </div>
 
     <div class="card" id="vi-c1">
       <div class="card-head">
@@ -542,7 +615,10 @@ const unrle = a => { const o = new Float64Array(T); let p = 0; for (let i = 0; i
 function getOff(id) { if (!offCache.has(id)) offCache.set(id, getJSON('o/' + id + '.json')); return offCache.get(id); }
 function getSummary() { if (!SUMMARY) SUMMARY = getJSON('summary.json'); return SUMMARY; }
 function getGeo() { if (!GEO) GEO = getJSON('geo.json'); return GEO; }
-/* counts: kind 'c' offences | 'a' adult offenders | 'j' juvenile offenders */
+let SEIFA = null;
+function getSeifa() { if (!SEIFA) SEIFA = getJSON('seifa.json'); return SEIFA; }
+const SEIFA_BANDS = [900, 950, 1000, 1050], SEIFA_SHORT = ['IRSD', 'IRSAD', 'IER', 'IEO'];
+/* counts: kind 'c' offences | 'a' adult offenders | 'j' juvenile offenders (+ m/f) | 'v' all victims | 'va', 'vj' adult / juvenile victims (+ m/f) */
 function counts(o, id, kind, loc) {
   const key = id + kind + loc.k + loc.i;
   if (seriesCache.has(key)) return seriesCache.get(key);
@@ -559,7 +635,7 @@ function pop(kind, loc) {
   const key = kind + loc.k + loc.i;
   if (popCache.has(key)) return popCache.get(key);
   let v = null;
-  if (kind === 'c') v = unrle(loc.k === 'q' ? POP.q : loc.k === 'l' ? POP.l[loc.i] : POP.d[loc.i]);
+  if (kind === 'c' || kind === 'v') v = unrle(loc.k === 'q' ? POP.q : loc.k === 'l' ? POP.l[loc.i] : POP.d[loc.i]);
   else if (loc.k === 'q') v = Float64Array.from(POP['q' + kind]);
   else if (loc.k === 'l') v = Float64Array.from(POP['l' + kind][loc.i]);
   popCache.set(key, v);
@@ -746,7 +822,7 @@ function tile(k, v, unit, delta, n) {
 }
 async function renderTrends() {
   const seq = ++trendsSeq, id = state.off, loc = state.loc, o = META.offences[id];
-  const cards = [$('#t-card1'), $('#t-card2'), $('#t-tiles')];
+  const cards = [$('#t-card1'), $('#t-card2'), $('#t-card3'), $('#t-tiles')];
   cards.forEach(c => c.classList.add('loading'));
   let f;
   try { f = await getOff(id); } catch (e) { return fatal(e); }
@@ -780,7 +856,24 @@ async function renderTrends() {
       if ($('#t-all').checked) series2.push({name: 'All aged 10+' + suffix, color: 'var(--s4)', dash, vals: rateSeries(addArr(a.c, j.c), addArr(a.p, j.p), mode)});
     }
   } else {
-    tiles.append(el('div', {class: 'tile'}, el('div', {class: 'k', text: 'Offender rates'}), el('div', {class: 'd', text: 'QPS publishes offender counts for Queensland and local government areas only. Choose an LGA to see adult and juvenile offender rates.'})));
+    tiles.append(el('div', {class: 'tile'}, el('div', {class: 'k', text: 'Offender rates'}), el('div', {class: 'd', text: 'QPS publishes offender and victim counts for Queensland and local government areas only. Choose an LGA to see offender and victim rates.'})));
+  }
+  /* victims (QPS): Queensland and LGAs; by age group and sex for offences against the person */
+  const vl = o.vic || 0, series3 = [];
+  if (!isDiv && vl) {
+    const V = roll(counts(f, id, 'v', loc), pop('v', loc));
+    const vc = counts(f, id, 'v', loc);
+    tiles.append(tile('Victim rate, ' + lowerFirst(winLabel(tEnd)), fRate(V[tEnd]), 'per 100,000', V[tEnd - 12] > 0 ? (V[tEnd] / V[tEnd - 12] - 1) * 100 : null, fInt(sumRange(vc, tEnd - 11, tEnd)) + ' victims recorded'));
+    if (vl === 2) {
+      const vsel = $('input[name="t-vsex"]:checked').value, sexWord = {m: 'male', f: 'female'};
+      for (const sx of (vsel === 'mf' ? ['m', 'f'] : [vsel === 'p' ? '' : vsel])) {
+        const suffix = sx ? ', ' + sexWord[sx] : '', dash = vsel === 'mf' && sx === 'f';
+        const a = {c: counts(f, id, 'va' + sx, loc), p: pop('va' + sx, loc)}, j = {c: counts(f, id, 'vj' + sx, loc), p: pop('vj' + sx, loc)};
+        if ($('#t-va').checked) series3.push({name: 'Adult (18+)' + suffix, color: 'var(--s2)', dash, vals: rateSeries(a.c, a.p, mode)});
+        if ($('#t-vj').checked) series3.push({name: 'Juvenile (0\u201317)' + suffix, color: 'var(--s3)', dash, vals: rateSeries(j.c, j.p, mode)});
+        if ($('#t-vall').checked) series3.push({name: 'All ages' + suffix, color: 'var(--s4)', dash, vals: sx ? rateSeries(addArr(a.c, j.c), addArr(a.p, j.p), mode) : rateSeries(vc, pop('v', loc), mode)});
+      }
+    } else series3.push({name: 'All victims', color: 'var(--s4)', vals: rateSeries(vc, pop('v', loc), mode)});
   }
   /* notes */
   const notes = $('#t-notes'); notes.textContent = '';
@@ -801,18 +894,37 @@ async function renderTrends() {
     const cfg2 = {series: series2, t0, t1: tEnd, mode, marks: [{t: META.juv_change_t, label: '17-year-olds counted as juveniles from Feb 2018', short: '17s juvenile from 2018'}], aria: `Line chart of adult and juvenile offender rates for ${o.name} in ${name}`};
     legend($('#t-leg2'), series2); lineChart($('#t-chart2'), cfg2); dataTable($('#t-tbl2'), cfg2);
   }
+  /* chart 3: victims */
+  $('#t-card3').hidden = isDiv || !vl;
+  if (!isDiv && vl) {
+    $('#t-vctl').hidden = vl !== 2;
+    $('#t-h3').textContent = `${o.name}: victim rate${vl === 2 ? ' by age group' : ''}, ${locFull(loc)}`;
+    $('#t-s3').textContent = vl === 2
+      ? `Victims recorded by police per 100,000 people in each age group${mode === 'roll' ? ' per year, rolling 12-month total' : ' per month'}. Juvenile victims are aged 0\u201317. A person can be counted more than once, so these are not unique people.${$('input[name="t-vsex"]:checked').value === 'p' ? '' : ' Male and female rates use same-sex populations; victims with sex not stated are counted under all persons only.'}`
+      : `Victims recorded by police per 100,000 population${mode === 'roll' ? ' per year, rolling 12-month total' : ' per month'}. For this offence QPS records the location as the victim, so there is no breakdown by age or sex.`;
+    if (!series3.length) series3.push({name: 'All victims', color: 'var(--s4)', vals: rateSeries(counts(f, id, 'v', loc), pop('v', loc), mode)});
+    const cfg3 = {series: series3, t0, t1: tEnd, mode, aria: `Line chart of victim rates for ${o.name} in ${name}`};
+    legend($('#t-leg3'), series3); lineChart($('#t-chart3'), cfg3); dataTable($('#t-tbl3'), cfg3);
+  }
 }
 
 /* ---------- summary helpers (12-month windows) ---------- */
 function winVal(S, meas, kind, o, i, w) {
   if (meas === 'off') { const c = kind === 'q' ? S.c_q[o][w] : kind === 'l' ? S.c_l[o][i][w] : S.c_d[o][i][w]; const p = kind === 'q' ? S.p_q[w] : kind === 'l' ? S.p_l[i][w] : S.p_d[i][w]; return {c, p}; }
   if (kind === 'd') return null;
+  if (meas === 'vic') { const v = kind === 'q' ? S.v_q[o] : S.v_l[o] && S.v_l[o][i]; if (!v) return null; return {c: v[w], p: kind === 'q' ? S.p_q[w] : S.p_l[i][w]}; }
+  if (meas === 'vadult' || meas === 'vjuv') {
+    const ad = meas === 'vadult', v = kind === 'q' ? S[ad ? 'va_q' : 'vj_q'][o] : S[ad ? 'va_l' : 'vj_l'][o] && S[ad ? 'va_l' : 'vj_l'][o][i]; if (!v) return null;
+    return {c: v[w], p: kind === 'q' ? S[ad ? 'pva_q' : 'pvj_q'][w] : S[ad ? 'pva_l' : 'pvj_l'][i][w]};
+  }
   const a = kind === 'q' ? S.a_q[o][w] : S.a_l[o][i][w], j = kind === 'q' ? S.j_q[o][w] : S.j_l[o][i][w];
   const pa = kind === 'q' ? S.pa_q[w] : S.pa_l[i][w], pj = kind === 'q' ? S.pj_q[w] : S.pj_l[i][w];
   return meas === 'adult' ? {c: a, p: pa} : meas === 'juv' ? {c: j, p: pj} : {c: a + j, p: pa + pj};
 }
-const measName = m => ({off: 'offence rate', adult: 'adult offender rate', juv: 'juvenile offender rate', all: 'offender rate (all aged 10+)'}[m]);
-const measDenom = m => ({off: 'population', adult: 'adults', juv: 'people aged 10–17', all: 'people aged 10 and over'}[m]);
+const measName = m => ({off: 'offence rate', adult: 'adult offender rate', juv: 'juvenile offender rate', all: 'offender rate (all aged 10+)', vic: 'victim rate', vadult: 'adult victim rate', vjuv: 'juvenile victim rate'}[m]);
+const measDenom = m => ({off: 'population', adult: 'adults', juv: 'people aged 10–17', all: 'people aged 10 and over', vic: 'population', vadult: 'adults', vjuv: 'people aged 0–17'}[m]);
+const measUnit = m => m === 'off' ? 'offences' : /^v/.test(m) ? 'victims' : 'offender counts';
+const isVicMeas = m => /^v/.test(m);
 
 /* ---------- CHANGES ---------- */
 async function renderChanges() {
@@ -835,6 +947,7 @@ async function renderChanges() {
     const r1 = now.c / now.p * 1e5, r0 = base.c / base.p * 1e5;
     rows.push({o, a, r0, r1, c0: base.c, c1: now.c, abs: r1 - r0, pct: r0 > 0 ? (r1 / r0 - 1) * 100 : null});
   }
+  if (isVicMeas(meas) && !offs.some(o => meas === 'vic' ? o.vic : o.vic === 2)) rows.length = 0;
   const key = sort === 'pct' ? 'pct' : 'abs';
   const valid = rows.filter(r => r[key] != null);
   const up = valid.filter(r => r[key] > 0).sort((a, b) => b[key] - a[key]).slice(0, nRows);
@@ -842,7 +955,7 @@ async function renderChanges() {
   const e0 = S.win_end[0], e1 = S.win_end[w1];
   $('#c-note').textContent = '';
   $('#c-note').append(el('span', null, el('b', {text: `${winLabel(e0)} compared with ${lowerFirst(winLabel(e1))}. `}),
-    `${fInt(rows.length)} crime type and location combinations qualify, with at least ${fInt(Math.max(1, minN))} ${meas === 'off' ? 'offences' : 'offender counts'} in ${sort === 'pct' ? 'the earlier period' : 'either period'}. Select a row to open its trend.`));
+    `${fInt(rows.length)} crime type and location combinations qualify, with at least ${fInt(Math.max(1, minN))} ${measUnit(meas)} in ${sort === 'pct' ? 'the earlier period' : 'either period'}. Select a row to open its trend.`));
   const unit = sort === 'pct' ? 'by % change in ' + measName(meas) : 'by change in ' + measName(meas) + ' per 100,000 ' + measDenom(meas);
   $('#c-s-up').textContent = 'Ranked ' + unit; $('#c-s-down').textContent = 'Ranked ' + unit;
   const maxMag = Math.max(1, ...up.concat(down).map(r => Math.abs(sort === 'pct' ? Math.min(r.pct, 300) : r.abs)));
@@ -857,7 +970,7 @@ async function renderChanges() {
       const tr = el('tr', {class: 'click', tabindex: 0},
         el('td', {class: 'loc-cell'}, document.createTextNode(locName(r.a)), el('small', {text: locTag(r.a)})),
         el('td', {class: 'off-cell', text: r.o.name}),
-        el('td', {class: 'num rate-cell'}, document.createTextNode(fRate(r.r0) + ' \u2192 ' + fRate(r.r1)), el('small', {text: fInt(r.c0) + ' \u2192 ' + fInt(r.c1) + (meas === 'off' ? ' offences' : ' counts')})),
+        el('td', {class: 'num rate-cell'}, document.createTextNode(fRate(r.r0) + ' \u2192 ' + fRate(r.r1)), el('small', {text: fInt(r.c0) + ' \u2192 ' + fInt(r.c1) + ' ' + (meas === 'off' ? 'offences' : isVicMeas(meas) ? 'victims' : 'counts')})),
         el('td', {class: 'num'}, el('div', {class: 'chg'}, el('span', {class: 'bar'}, bar), el('b', {text: sort === 'pct' ? fPct(r.pct) : fSigned(r.abs)}))));
       const go = () => { setOff(r.o.id); state.loc = r.a; locCombo.set(locName(r.a)); location.hash = 'trends'; };
       tr.addEventListener('click', go); tr.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
@@ -906,9 +1019,11 @@ function quantBreaks(vals, n) {
 async function renderMap() {
   let S, G; try { [S, G] = await Promise.all([getSummary(), getGeo()]); } catch (e) { return fatal(e); }
   if (!M.ready) { M.layers.l = buildLayer(G.l); M.layers.d = buildLayer(G.d); M.ready = true; initMapEvents(); fitBox(layerBox(M.layers.d)); }
-  const meas = $('#m-meas').value;
-  if (meas !== 'off' && mapGeo() === 'd') $('#m-geo-l').checked = true;
-  $('#m-geo-d').disabled = meas !== 'off';
+  const meas = $('#m-meas').value, isSei = /^seifa/.test(meas);
+  if (meas !== 'off' && !isSei && mapGeo() === 'd') $('#m-geo-l').checked = true;
+  $('#m-geo-d').disabled = meas !== 'off' && !isSei;
+  ['#m-win', '#m-show', '#v-map .offsel'].forEach(q => { const e = $(q); if (e) e.disabled = isSei; });
+  if (isSei) return renderMapSeifa(S, +meas.split('-')[1]);
   const geo = mapGeo(), feats = M.layers[geo], id = state.off, w = +$('#m-win').value, show = $('#m-show').value;
   const names = geo === 'l' ? META.lgas.map(shortLga) : META.divisions;
   if (M.sel && M.sel.k !== geo) M.sel = null;
@@ -928,7 +1043,9 @@ async function renderMap() {
   const L = $('#m-legend'); L.textContent = '';
   const o = META.offences[id];
   L.append(el('div', {class: 't', text: show === 'rate' ? `${o.name}: ${measName(meas)} per 100,000 ${measDenom(meas)}, ${lowerFirst(winLabel(S.win_end[w]))}` : `${o.name}: % change in ${measName(meas)} on ${show === '1' ? 'a year' : show + ' years'} earlier`}));
+  if (isVicMeas(meas) && !o.vic) L.append(el('div', {class: 't', text: 'QPS publishes victim counts only for offences against the person, unlawful entry and unlawful use of a motor vehicle. Choose one of those crime types.'}));
   const sw = el('div', {class: 'sw'});
+  if (!info.some(x => x.v != null)) M.colors = [];
   M.colors.forEach((col, i) => { const b = el('i'); b.style.background = col; const lo = i ? M.breaks[i - 1] : null, hi = i < M.breaks.length ? M.breaks[i] : null; const f = show === 'rate' ? fRate : (x => (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x) + '%'); sw.append(el('div', null, b, el('span', {text: lo == null ? '< ' + f(hi) : hi == null ? f(lo) + ' +' : f(lo)}))); });
   const nd = el('i'); nd.className = 'hatch'; sw.append(el('div', null, nd, el('span', {text: show === 'rate' ? 'no data' : 'too few'})));
   L.append(sw);
@@ -941,8 +1058,45 @@ async function renderMap() {
   const rk = $('#m-rank'); rk.textContent = ''; rk.append(el('table', null, el('thead', null, el('tr', null, el('th', {class: 'num', text: '#'}), el('th', {text: 'Area'}), el('th', {class: 'num', text: show === 'rate' ? 'Rate' : 'Change'}))), tb));
   renderSel(S); drawMap();
 }
+async function renderMapSeifa(S, k) {
+  let SE; try { SE = await getSeifa(); } catch (e) { return fatal(e); }
+  const geo = mapGeo(), feats = M.layers[geo], names = geo === 'l' ? META.lgas.map(shortLga) : META.divisions, G = SE[geo];
+  if (M.sel && M.sel.k !== geo) M.sel = null;
+  M.info = feats.map((f, i) => { const v = G.score[i] ? G.score[i][k] : null; return v == null ? {v: null} : {v, seifa: true, q1: G.q1[i] && G.q1[i][k], dA: geo === 'l' ? G.dec_aus[i][k] : null, dQ: geo === 'l' ? G.dec_qld[i][k] : null, p: G.urp[i]}; });
+  M.names = names; M.geo = geo; M.show = 'seifa'; M.meas = 'seifa-' + k; M.seiK = k;
+  M.breaks = SEIFA_BANDS; M.colors = [5, 4, 3, 2, 1].map(c => cssv('--sei-' + c));
+  M.classOf = v => { let c = 0; while (c < M.breaks.length && v >= M.breaks[c]) c++; return c; };
+  const L = $('#m-legend'); L.textContent = '';
+  L.append(el('div', {class: 't', text: `${SE.indexes[k].name} (${SEIFA_SHORT[k]}), SEIFA 2021 score. Lower scores mean ${k === 0 ? 'more disadvantage' : 'more disadvantage, higher scores more advantage'}.${geo === 'd' ? ' Police divisions: population-weighted average of their SA1 scores.' : ''}`}));
+  const sw = el('div', {class: 'sw'});
+  M.colors.forEach((col, i) => { const b = el('i'); b.style.background = col; const lo = i ? M.breaks[i - 1] : null, hi = i < M.breaks.length ? M.breaks[i] : null; sw.append(el('div', null, b, el('span', {text: lo == null ? '< ' + fInt(hi) : hi == null ? fInt(lo) + ' +' : fInt(lo) + '\u2013' + fInt(hi - 1)}))); });
+  L.append(sw);
+  const order = M.info.map((x, i) => ({x, i})).filter(r => r.x.v != null).sort((a, b) => a.x.v - b.x.v);
+  $('#m-rank-h').textContent = `Areas ranked by ${SEIFA_SHORT[k]} score`;
+  $('#m-rank-s').textContent = `${order.length} ${geo === 'l' ? 'local government areas' : 'police divisions'}, lowest score (most disadvantaged) first. Select a row to find it on the map.`;
+  const tb = el('tbody');
+  order.forEach((r, n) => { const tr = el('tr', {class: 'click', tabindex: 0}, el('td', {class: 'num', text: n + 1}), el('td', {text: names[r.i]}), el('td', {class: 'num', text: fInt(r.x.v)})); const go = () => selectArea(geo, r.i, true); tr.addEventListener('click', go); tr.addEventListener('keydown', e => { if (e.key === 'Enter') go(); }); tb.append(tr); });
+  const rk = $('#m-rank'); rk.textContent = ''; rk.append(el('table', null, el('thead', null, el('tr', null, el('th', {class: 'num', text: '#'}), el('th', {text: 'Area'}), el('th', {class: 'num', text: 'Score'}))), tb));
+  renderSel(S); drawMap();
+}
 function renderSel(S) {
   const host = $('#m-sel'); host.textContent = '';
+  if (M.sel && M.show === 'seifa') {
+    const i = M.sel.i, x = M.info[i], loc = {k: M.geo, i}, k = M.seiK;
+    host.append(el('h3', {text: locName(loc)}), el('p', {class: 'sub', text: `${locTag(loc)} \u00B7 SEIFA 2021`}));
+    if (!x || x.v == null) { host.append(el('p', {class: 'sub', text: 'No SEIFA score for this area.'})); return; }
+    const dl = el('dl', {class: 'kv'}), add = (a, b) => dl.append(el('dt', {text: a}), el('dd', {text: b}));
+    add(`${SEIFA_SHORT[k]} score`, fInt(x.v));
+    if (x.dA != null) add('Australian decile (1 = lowest)', String(x.dA));
+    if (x.dQ != null) add('Queensland decile (1 = lowest)', String(x.dQ));
+    if (x.q1 != null) add('Residents in the lowest national fifth of SA1s', nf1.format(x.q1) + '%');
+    if (x.p) add('Usual residents, 2021 Census', fInt(x.p));
+    host.append(dl);
+    const btn = el('button', {class: 'btn primary', type: 'button', text: 'Compare with crime rates', style: 'margin-top:10px'});
+    btn.addEventListener('click', () => { location.hash = 'seifa'; });
+    host.append(btn);
+    return;
+  }
   if (!M.sel) { host.append(el('h3', {text: 'Select an area'}), el('p', {class: 'sub', text: 'Click the map, search for a place, or pick a row from the ranked list to see its figures.'})); return; }
   const i = M.sel.i, x = M.info[i], loc = {k: M.geo, i}, o = META.offences[state.off], w = +$('#m-win').value;
   host.append(el('h3', {text: locName(loc)}), el('p', {class: 'sub', text: `${locTag(loc)} · ${o.name} · ${lowerFirst(winLabel(S.win_end[w]))}`}));
@@ -950,7 +1104,7 @@ function renderSel(S) {
   const dl = el('dl', {class: 'kv'});
   const add = (k, v) => dl.append(el('dt', {text: k}), el('dd', {text: v}));
   add(measName(M.meas).replace(/^./, c => c.toUpperCase()) + ' per 100,000', fRate(x.rate));
-  add(M.meas === 'off' ? 'Offences reported' : 'Offender counts', fInt(x.c));
+  add(M.meas === 'off' ? 'Offences reported' : isVicMeas(M.meas) ? 'Victims' : 'Offender counts', fInt(x.c));
   add(M.meas === 'off' ? 'Population' : measDenom(M.meas).replace(/^./, c => c.toUpperCase()), fInt(x.p));
   if (x.pct != null) add(`Change on ${M.show === 'rate' || M.show === '1' ? 'a year' : M.show + ' years'} earlier`, fPct(x.pct));
   host.append(dl);
@@ -1022,8 +1176,9 @@ function initMapEvents() {
     if (i < 0) { tip.hidden = true; return; }
     const x = M.info[i]; tip.textContent = '';
     tip.append(el('div', {class: 'h', text: M.names[i]}));
-    if (x.rate == null) tip.append(el('div', {class: 'r'}, el('span', {text: 'No rate available'})));
-    else { tip.append(el('div', {class: 'r'}, el('b', {text: fRate(x.rate)}), el('span', {text: 'per 100,000'})), el('div', {class: 'r'}, el('b', {text: fInt(x.c)}), el('span', {text: M.meas === 'off' ? 'offences' : 'offender counts'}))); if (x.pct != null) tip.append(el('div', {class: 'r'}, el('b', {text: fPct(x.pct)}), el('span', {text: `on ${M.show === 'rate' || M.show === '1' ? 'a year' : M.show + ' years'} earlier`}))); }
+    if (x.seifa) tip.append(el('div', {class: 'r'}, el('b', {text: fInt(x.v)}), el('span', {text: SEIFA_SHORT[M.seiK] + ' score'})));
+    else if (x.rate == null) tip.append(el('div', {class: 'r'}, el('span', {text: 'No rate available'})));
+    else { tip.append(el('div', {class: 'r'}, el('b', {text: fRate(x.rate)}), el('span', {text: 'per 100,000'})), el('div', {class: 'r'}, el('b', {text: fInt(x.c)}), el('span', {text: measUnit(M.meas)}))); if (x.pct != null) tip.append(el('div', {class: 'r'}, el('b', {text: fPct(x.pct)}), el('span', {text: `on ${M.show === 'rate' || M.show === '1' ? 'a year' : M.show + ' years'} earlier`}))); }
     tip.hidden = false; const tw = tip.offsetWidth, th = tip.offsetHeight, {w, h} = mapSize();
     tip.style.left = Math.min(w - tw - 6, p[0] + 14) + 'px'; tip.style.top = Math.min(h - th - 6, p[1] + 14) + 'px';
   });
@@ -1049,7 +1204,9 @@ async function renderFunnel() {
   const geo = $('input[name="f-geo"]:checked').value, id = state.off, w = +$('#f-win').value, o = META.offences[id];
   const adj = $('input[name="f-lim"]:checked').value === 'od', logY = $('input[name="f-scale"]:checked').value === 'log';
   const names = geo === 'l' ? META.lgas.map(shortLga) : META.divisions;
-  const st = winVal(S, meas, 'q', id, 0, w), R0 = st.c / st.p * 1e5;
+  const st = winVal(S, meas, 'q', id, 0, w);
+  if (!st) { ['#f-chart', '#f-table', '#f-note'].forEach(q => { $(q).textContent = ''; }); $('#f-h').textContent = `${o.name}: no victim data`; $('#f-s').textContent = ''; $('#f-chart').append(el('p', {class: 'sub', text: 'QPS publishes victim counts only for offences against the person, unlawful entry and unlawful use of a motor vehicle. Choose one of those crime types, or another measure.'})); return; }
+  const R0 = st.c / st.p * 1e5;
   const pts = [];
   names.forEach((name, i) => { const a = winVal(S, meas, geo, id, i, w); if (!a || !(a.p > 0)) return; const E = a.p * R0 / 1e5; pts.push({i, name, c: a.c, p: a.p, E, rate: a.c / a.p * 1e5, z: 2 * (Math.sqrt(a.c) - Math.sqrt(E))}); });
   /* overdispersion factor from winsorised z-scores (10% each tail), after Spiegelhalter (2005) */
@@ -1241,7 +1398,10 @@ function renderAbout() {
       li(B('Map: '), 'compare rates across Queensland, or search for a place.'),
       li(B('Funnel plot: '), 'see which areas sit well above or below the Queensland rate once the size of their population is taken into account.'),
       li(B('Offence mix: '), 'see how the make-up of recorded crime in a place has shifted over time.'),
-      li(B('Victims: '), 'see how the number and rate of victims of selected offences in Queensland have changed each year, by type of offence and by the age and sex of victims.')),
+      li(B('Victim rates: '), 'for offences against the person, unlawful entry and unlawful use of a motor vehicle, the Trends, Biggest changes, Map and Funnel plot tabs also show victim rates for Queensland and each local government area, from monthly QPS data.'),
+      li(B('Map layers for disadvantage: '), 'colour the map by any of the four ABS SEIFA 2021 indexes, for local government areas or police divisions.'),
+      li(B('Disadvantage: '), 'see how offence, offender and victim rates line up with area disadvantage, using a scatter plot, rates for fifths of the population, and rank correlations for all four SEIFA indexes.'),
+      li(B('Victims: '), 'see victims by crime type, age and sex for any local government area from QPS, and longer-term annual detail for Queensland from ABS, including relationship to the offender and family and domestic violence.')),
     H('Understanding the numbers'),
     el('ul', null,
       li(B('Rates, not counts. '), 'Figures are shown per 100,000 people so that places with different populations can be compared fairly.'),
@@ -1252,10 +1412,18 @@ function renderAbout() {
       li(B('Residents, not visitors. '), 'Rates are based on the number of people who live in an area. Places with many visitors or workers compared with residents can show high rates for that reason.'),
       li(B('Seasons. '), 'Recorded crime rises and falls through the year. The rolling 12-month view removes that pattern and is the better guide to the underlying trend. QPS advises care when comparing one month with the next.'),
       li(B('No adjustment for who lives there. '), 'Rates are not adjusted for the age profile or other characteristics of an area.')),
-    H('About the Victims tab'),
-    P('The Victims tab uses a different source from the rest of this site: ', link('ABS, Recorded Crime – Victims', 'https://www.abs.gov.au/statistics/people/crime-and-justice/recorded-crime-victims/latest-release'), ', which ABS compiles each year from state and territory police records using national counting rules. ', vrel),
+    H('Victim figures from QPS (monthly)'),
+    P('QPS publishes monthly counts of reported victims from January 2001 for Queensland and each local government area (', link('QPS, Maps and statistics', 'https://www.police.qld.gov.au/maps-and-statistics'), '). This site uses them for the victim rates on the Trends, Biggest changes, Map and Funnel plot tabs and for the first section of the Victims tab. They are updated with the rest of the site each month.'),
     el('ul', null,
-      li(B('Victims, not offences. '), 'The other tabs count offences recorded by Queensland police each month. The Victims tab counts victims in each calendar year, for a selected set of offences, for Queensland as a whole. The two sets of figures are counted differently and will not match.'),
+      li(B('Which offences. '), 'Offences against the person, by age group and sex, plus unlawful entry and unlawful use of a motor vehicle. For those two property offences QPS records the location, not a person, as the victim, so there is no age or sex breakdown.'),
+      li(B('Not unique people. '), 'A person who is a victim more than once, or of more than one offence, is counted each time.'),
+      li(B('Age groups. '), 'QPS defines juvenile victims as those aged 0 to 17, and adults as 18 and over, throughout the series. This differs from offenders, where 17-year-olds were counted as adults before February 2018.'),
+      li(B('Rates. '), 'Adult and juvenile victim rates use ABS estimated resident population aged 18 and over, and aged 0 to 17, of the same sex where a sex is chosen. The rate for all victims uses the same population as the offence rate. Victims whose sex is not stated (fewer than 0.2%) are counted under all persons only.'),
+      li(B('Not for police divisions. '), 'QPS publishes victim counts for regions, districts and local government areas, but not police divisions.')),
+    H('Victim figures from ABS (annual)'),
+    P('The rest of the Victims tab uses a different source: ', link('ABS, Recorded Crime – Victims', 'https://www.abs.gov.au/statistics/people/crime-and-justice/recorded-crime-victims/latest-release'), ', which ABS compiles each year from state and territory police records using national counting rules. ', vrel),
+    el('ul', null,
+      li(B('Victims, not offences. '), 'The other tabs count offences recorded by Queensland police each month. These ABS figures count victims in each calendar year, for a selected set of offences, for Queensland as a whole. ABS applies national counting rules, so its figures will not match the QPS victim counts or the offence figures.'),
       li(B('Not a count of individual people. '), 'ABS does not count unique people. A person who is a victim of more than one type of offence is counted once under each type. See the ', link('ABS Recorded Crime – Victims methodology', 'https://www.abs.gov.au/methodologies/recorded-crime-victims-methodology/2025'), '.'),
       li(B('Who counts as a victim. '), 'For homicide, assault, sexual assault and kidnapping or abduction, the victim is a person. For robbery, blackmail or extortion and other theft, the victim can be a person or an organisation. For burglary the victim is the premises, and for motor vehicle theft it is the vehicle. Figures by age, sex and relationship cover people only.'),
       li(B('Counted when reported. '), 'A victim is counted in the year the offence was reported to, or detected by, police. That is not always the year it happened, which matters most for sexual assault, where many reports are made long after the incident.'),
@@ -1264,11 +1432,22 @@ function renderAbout() {
       li(B('A change in police recording in 2021. '), 'From 1 July 2021, Queensland police have been required to record every criminal offence linked to a domestic and family violence incident. The Queensland Government Statistician treats 2021–22 as a break in the series for domestic and family violence-related figures (', link('Queensland Government statement, 6 April 2023', 'https://statements.qld.gov.au/statements/97530'), '). ABS victim counts are compiled from the same police records, so figures from 2021 may not be directly comparable with earlier years, particularly for offences that often occur in a family or domestic setting.'),
       li(B('Age groups. '), 'ABS changed the age groups it publishes in 2021. To show a consistent series from 2010, this site combines ages 10 to 24 for sexual assault, robbery and assault, and uses three broad groups for homicide, kidnapping or abduction, and blackmail or extortion.'),
       li(B('Family and domestic violence. '), 'ABS treats a victim as family and domestic violence-related where the relationship recorded by police is a specified family or domestic one, or where police have recorded a family and domestic violence flag.')),
+    H('Area disadvantage (SEIFA)'),
+    P('The disadvantage map layers and the Disadvantage tab use ', link('ABS, Socio-Economic Indexes for Areas (SEIFA), Australia, 2021', 'https://www.abs.gov.au/statistics/people/people-and-communities/socio-economic-indexes-areas-seifa-australia/latest-release'), ', which ranks areas using 2021 Census data. SEIFA is updated every five years, so these figures stay fixed until ABS releases SEIFA from the 2026 Census. Lower scores mean more disadvantage on all four indexes; the IRSAD, IER and IEO also show advantage at the top of the scale.'),
+    el('ul', null,
+      li(B('The four indexes. '), 'IRSD: relative socio-economic disadvantage. IRSAD: relative socio-economic advantage and disadvantage. IER: economic resources (for example income and housing). IEO: education and occupation.'),
+      li(B('Local government areas. '), 'Scores and deciles are those ABS publishes for 2021 LGAs. All 78 of the 2025 LGAs used on this site match a 2021 LGA.'),
+      li(B('Police divisions. '), 'ABS does not publish SEIFA for police divisions. Each Queensland SA1 (the smallest area with a SEIFA score) is placed in the division that contains a point inside it, and the division score is the average of its SA1 scores, weighted by usual resident population. Nine small divisions contain no SA1 point and take the score of the SA1 at their centre. Applied to LGAs, the same method reproduces the scores ABS publishes almost exactly (correlation 1.00, average difference under one point), which supports using it for divisions. An average score can hide wide variation within an area.'),
+      li(B('Lowest national fifth. '), 'For each area the site also shows the share of residents living in SA1s in deciles 1 and 2 nationally.'),
+      li(B('Correlation, not cause. '), 'The Disadvantage tab describes how rates and disadvantage vary together across areas. Area-level patterns do not show that disadvantage causes crime, and they say nothing about individual residents. Small areas with very high rates can dominate the scatter plot, which is why the tab also shows combined rates for fifths of the population.'),
+      li(B('Statistics. '), 'Spearman rank correlations treat each area equally. The 95% confidence interval uses the standard error proposed by ', link('Bonett and Wright (2000)', 'https://doi.org/10.1007/BF02294183'), '. Fifths are formed by ranking areas by score and grouping them into five groups of about equal population; the rate for each group is its total count divided by its total population.')),
     H('Where the data come from'),
     el('ul', null,
       li(link('Queensland Police Service, Maps and statistics', 'https://www.police.qld.gov.au/maps-and-statistics'), ': reported offences for Queensland, local government areas and police divisions; reported offenders by age group and sex for Queensland and local government areas; police division boundaries.'),
       li(link('ABS, National, state and territory population', 'https://www.abs.gov.au/statistics/people/population/national-state-and-territory-population/latest-release'), `: Queensland population by single year of age and sex, at 30 June each year to ${META.abs_last_june}.`),
       li(link('ABS, Regional population by age and sex', 'https://www.abs.gov.au/statistics/people/population/regional-population-age-and-sex/latest-release'), `: population of each local government area by age group and sex, 30 June ${META.start_year} to ${META.abs_lga_last_june}.`),
+      li(link('ABS, SEIFA 2021', 'https://www.abs.gov.au/statistics/people/people-and-communities/socio-economic-indexes-areas-seifa-australia/latest-release'), ': Local Government Area and Statistical Area Level 1 indexes, with ', link('ABS SA1 2021 boundaries', 'https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs/edition-3-july-2021-june-2026/access-and-downloads/digital-boundary-files'), ' to place SA1s in police divisions.'),
+      li(link('QPS, reported victims', 'https://www.police.qld.gov.au/maps-and-statistics'), ': monthly victims of offences against the person by age group and sex, and of unlawful entry and unlawful use of a motor vehicle, for Queensland and local government areas.'),
       li(link('ABS, Recorded Crime – Victims', 'https://www.abs.gov.au/statistics/people/crime-and-justice/recorded-crime-victims/latest-release'), ': victims of selected offences in Queensland by offence, age, sex, relationship of offender to victim, family and domestic violence status, location, weapon use and investigation outcome (Victims tab only). Age figures before the latest year come from the release for each year from 2010.'),
       li(link('ABS, digital boundary files', 'https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs-edition-3/jul2021-jun2026/access-and-downloads/digital-boundary-files'), ': local government area boundaries (2025).')),
     P('Police divisions are the smallest areas for which QPS publishes offence counts. Offender counts are published for Queensland and local government areas only, so offender rates are not available for police divisions.'),
@@ -1396,11 +1575,45 @@ function swLegend(host, series, line) {
 }
 
 /* ---------- VICTIMS ---------- */
-let VICTIMS = null, viReady = false;
+let VICTIMS = null, viReady = false, VI_DEFAULTS = null;
+/* snapshot and restore the controls inside a container (used by the reset button) */
+function snapControls(root) { return $$('select, input', root).map(e => ({e, v: e.value, c: e.checked})); }
+function restoreControls(snap) { (snap || []).forEach(({e, v, c}) => { if (e.type === 'radio' || e.type === 'checkbox') e.checked = c; else e.value = v; }); }
 function getVictims() { if (!VICTIMS) VICTIMS = getJSON('victims.json'); return VICTIMS; }
 const AGE_LABEL = b => b.replace('-', '–').replace('+', ' and over') + (/\+$/.test(b) ? '' : ' years');
 const radio = name => $(`input[name="${name}"]:checked`).value;
+let viqCombo = null, viqLoc = {k: 'q', i: 0};
+async function renderVictimsQPS() {
+  let S; try { S = await getSummary(); } catch (e) { return fatal(e); }
+  if (!viqCombo) {
+    viqCombo = combo($('#viq-loc'), {initial: 'Queensland', placeholder: 'Search LGAs', groups: () => placeGroups(true, ['l']), onPick: it => { viqLoc = it.loc; renderVictimsQPS(); }});
+    const so = $('#viq-o'); META.offences.filter(o => o.vic === 2).forEach(o => so.append(el('option', {value: o.id, text: '\u00A0\u00A0\u00A0'.repeat(o.lvl) + o.name})));
+    so.value = 0; so.addEventListener('change', renderVictimsQPS);
+    $$('input[name="viq-meas"]').forEach(i => i.addEventListener('change', renderVictimsQPS));
+    $('#viq-go').addEventListener('click', e => { e.preventDefault(); setOff(+$('#viq-o').value); state.loc = viqLoc; locCombo.set(locName(viqLoc)); location.hash = 'trends'; });
+  }
+  const loc = viqLoc, rate = radio('viq-meas') === 'rate', e0 = S.win_end[0], name = locName(loc), Lk = loc.k === 'q';
+  $('#viq-s').textContent = `Victims recorded by Queensland police, ${lowerFirst(winLabel(e0))}, ${locFull(loc)}. Monthly data from January 2001; a person can be counted more than once.`;
+  /* by crime type: level 0-1 offences with victim data */
+  const list = META.offences.filter(o => o.vic && (o.lvl === 1 || o.id === 0));
+  const P0 = Lk ? S.p_q[0] : S.p_l[loc.i][0], P1 = Lk ? S.p_q[1] : S.p_l[loc.i][1];
+  const rows = list.map(o => { const v = Lk ? S.v_q[o.id] : S.v_l[o.id][loc.i]; const r1 = v[0] / P0 * 1e5, r0 = v[1] / P1 * 1e5; return {o, n: v[0], n0: v[1], r1, chg: r0 > 0 && Math.max(v[0], v[1]) >= 20 ? (r1 / r0 - 1) * 100 : null}; });
+  $('#viq-h1').textContent = 'By crime type';
+  $('#viq-s1').textContent = (rate ? 'Victims per 100,000 population' : 'Number of victims') + ', with the change on the previous 12 months where there are at least 20 victims. For unlawful entry and unlawful use of a motor vehicle, QPS counts the location as the victim.';
+  hbars($('#viq-off'), rows.map(r => ({label: r.o.name, bars: [{v: rate ? r.r1 : r.n, color: r.o.id === 0 ? 'var(--accent)' : r.o.parent === 0 ? 'var(--s1)' : 'var(--s7)', text: (rate ? fRate(r.r1) : fInt(r.n)) + (r.chg == null ? '' : ' (' + fPct(r.chg) + ')')}]})));
+  /* by age group and sex for the chosen offence against the person */
+  const id = +$('#viq-o').value, o = META.offences[id];
+  let f; try { f = await getOff(id); } catch (e) { return fatal(e); }
+  const t1 = T - 1, t0 = T - 12;
+  const cell = k => { const c = counts(f, id, k, loc), pp = pop(k, loc); if (!c || !pp) return null; const n = sumRange(c, t0, t1), pm = sumRange(pp, t0, t1) / 12; return {n, r: pm > 0 ? n / pm * 1e5 : null}; };
+  $('#viq-h2').textContent = 'By age group and sex';
+  $('#viq-s2').textContent = rate ? 'Victims per 100,000 people of the same age group and sex. Juvenile victims are aged 0\u201317.' : 'Number of victims. Juvenile victims are aged 0\u201317.';
+  swLegend($('#viq-leg'), [{name: 'Female', color: 'var(--s2)'}, {name: 'Male', color: 'var(--s1)'}]);
+  hbars($('#viq-age'), [['a', 'Adults (18+)'], ['j', 'Juveniles (0\u201317)']].map(([a, lab]) => ({label: lab, bars: ['f', 'm'].map(sx => { const x = cell('v' + a + sx); return {v: x ? (rate ? x.r : x.n) : null, color: sx === 'f' ? 'var(--s2)' : 'var(--s1)', text: x ? (rate ? fRate(x.r) + ' (' + fInt(x.n) + ')' : fInt(x.n)) : 'np'}; })})));
+  $('#viq-go').textContent = `See the trend over time: ${o.name}, ${name}`;
+}
 async function renderVictims() {
+  renderVictimsQPS();
   let V; try { V = await getVictims(); } catch (e) { return fatal(e); }
   const T = V.trends, A = V.age, ly = V.latest;
   if (!viReady) {
@@ -1410,6 +1623,7 @@ async function renderVictims() {
     const o3 = $('#vi3-off'); Object.keys(V.relationship.offences).forEach(k => o3.append(el('option', {value: k, text: k}))); o3.value = 'Sexual assault';
     const o4 = $('#vi4-off'); Object.keys(V.fdv.offences).forEach(k => o4.append(el('option', {value: k, text: k}))); o4.value = 'Sexual assault';
     const o6 = $('#vi6-off'); Object.keys(V.snapshot.outcome).forEach(k => o6.append(el('option', {value: k, text: k}))); o6.value = 'Assault';
+    VI_DEFAULTS = snapControls($('#v-victims'));
     $$('#v-victims select, #v-victims input').forEach(i => i.addEventListener('change', renderVictims));
   }
   /* 1. offence trends */
@@ -1494,7 +1708,7 @@ async function renderVictims() {
   {
     const S = V.sexual_assault, sex = radio('vi5-sex'), share = radio('vi5-meas') === 'share', d = S.report[sex];
     const short = ['Under 6 months', '6 months to 1 year', '1 to 2 years', '2 to 5 years', '5 to 10 years', '10 to 20 years', '20 years or more'];
-    const series = S.categories.map((c, i) => ({name: short[i], color: `var(--div-${i + 1})`, vals: d[c]}));
+    const series = S.categories.map((c, i) => ({name: short[i], color: `var(--ord-${i + 1})`, vals: d[c]}));
     $('#vi5-s').textContent = (share ? 'Share of sexual assault victims each year' : 'Number of sexual assault victims each year') + ', by how long after the incident it was reported to police. Queensland' + (sex === 'Persons' ? '' : sex === 'Female' ? ', female victims' : ', male victims') + '.';
     swLegend($('#vi5-leg'), series);
     stackChart($('#vi5-chart'), {cats: S.years.map(String), series, pct: share, aria: 'Stacked bar chart of time between incident and report for sexual assault victims in Queensland by year'});
@@ -1520,8 +1734,81 @@ async function renderVictims() {
   }
 }
 
+/* ---------- DISADVANTAGE (SEIFA x rates) ---------- */
+function ranks(a) { const o = a.map((v, i) => [v, i]).sort((x, y) => x[0] - y[0]), r = new Array(a.length); for (let i = 0; i < o.length;) { let j = i; while (j + 1 < o.length && o[j + 1][0] === o[i][0]) j++; for (let k = i; k <= j; k++) r[o[k][1]] = (i + j) / 2 + 1; i = j + 1; } return r; }
+function spearman(x, y) {
+  const n = x.length; if (n < 5) return null;
+  const rx = ranks(x), ry = ranks(y), mx = (n + 1) / 2;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const a = rx[i] - mx, b = ry[i] - mx; sxy += a * b; sxx += a * a; syy += b * b; }
+  const r = sxy / Math.sqrt(sxx * syy), z = Math.atanh(Math.max(-0.9999, Math.min(0.9999, r))), se = Math.sqrt((1 + r * r / 2) / (n - 3)); /* Bonett & Wright (2000) */
+  return {r, lo: Math.tanh(z - 1.96 * se), hi: Math.tanh(z + 1.96 * se), n};
+}
+function fifths(pts) {
+  /* areas ordered by score (lowest = most disadvantaged), cut into five groups of roughly equal population; pooled rate per group */
+  const o = pts.slice().sort((a, b) => a.s - b.s), tot = o.reduce((t, d) => t + d.p, 0); let cum = 0;
+  const g = [0, 1, 2, 3, 4].map(() => ({c: 0, p: 0, n: 0}));
+  for (const d of o) { const k = Math.min(4, Math.floor((cum + d.p / 2) / tot * 5)); cum += d.p; g[k].c += d.c; g[k].p += d.p; g[k].n++; }
+  return g.map(x => ({...x, rate: x.p > 0 ? x.c / x.p * 1e5 : null}));
+}
+async function renderSeifa() {
+  let S, SE; try { [S, SE] = await Promise.all([getSummary(), getSeifa()]); } catch (e) { return fatal(e); }
+  const id = state.off, o = META.offences[id], meas = $('#s-meas').value, k = +$('#s-idx').value, w = +$('#s-win').value, logY = $('input[name="s-scale"]:checked').value === 'log';
+  if (meas !== 'off' && $('input[name="s-geo"]:checked').value === 'd') $('#s-geo-l').checked = true;
+  $('#s-geo-d').disabled = meas !== 'off';
+  const geo = $('input[name="s-geo"]:checked').value, G = SE[geo], names = geo === 'l' ? META.lgas.map(shortLga) : META.divisions, ix = SEIFA_SHORT[k];
+  const collect = kk => { const out = []; names.forEach((name, i) => { const a = winVal(S, meas, geo, id, i, w), sc = G.score[i] && G.score[i][kk]; if (!a || !(a.p > 0) || sc == null) return; out.push({i, name, c: a.c, p: a.p, s: sc, rate: a.c / a.p * 1e5}); }); return out; };
+  const pts = collect(k), area = geo === 'l' ? 'local government area' : 'police division';
+  $('#s-h').textContent = `${o.name}: ${measName(meas)} against ${ix} score, by ${area}`;
+  $('#s-s').textContent = `${winLabel(S.win_end[w])}. Each dot is one ${area}, sized by population; hollow dots have fewer than 5,000 ${meas === 'off' || meas === 'vic' ? 'residents' : measDenom(meas)}. Lower ${ix} scores mean more disadvantage.${geo === 'd' ? ' Division scores are population-weighted averages of SA1 scores.' : ''}`;
+  const host = $('#s-chart'); host.textContent = '';
+  ['#s-stat', '#s-fifths', '#s-corr'].forEach(q => { $(q).textContent = ''; });
+  if (pts.length < 5) { host.append(el('p', {class: 'sub', text: isVicMeas(meas) && !o.vic ? 'QPS publishes victim counts only for offences against the person, unlawful entry and unlawful use of a motor vehicle. Choose one of those crime types.' : 'Not enough areas with data for this selection.'})); return; }
+  /* scatter */
+  const W = Math.max(320, host.clientWidth || 800), H = Math.min(460, Math.max(300, W * 0.5)), m = {l: 58, r: 16, t: 12, b: 40}, pw = W - m.l - m.r, ph = H - m.t - m.b;
+  const xs = pts.map(d => d.s), x0 = Math.floor(Math.min(...xs) / 50) * 50, x1 = Math.ceil(Math.max(...xs) / 50) * 50;
+  const pos = pts.filter(d => d.rate > 0).map(d => d.rate), rmax = Math.max(...pts.map(d => d.rate), 1e-9);
+  const lo = pos.length ? Math.pow(10, Math.floor(Math.log10(Math.min(...pos)))) : 1, hi = Math.pow(10, Math.ceil(Math.log10(rmax)));
+  const X = v => m.l + (v - x0) / (x1 - x0 || 1) * pw;
+  const linTop = (() => { const st = niceStep(rmax * 1.05, 5); return Math.ceil(rmax * 1.05 / st) * st; })();
+  const Y = v => logY ? (v > 0 ? m.t + ph - (Math.log10(v) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo) || 1) * (ph - 14) - 14 : m.t + ph - 4) : m.t + ph - v / linTop * ph;
+  const svg = sv('svg', {viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', 'aria-label': `Scatter plot of ${measName(meas)} against ${ix} score by ${area}`});
+  if (logY) { for (let v = lo; v <= hi * 1.0001; v *= 10) { svg.append(sv('line', {x1: m.l, x2: m.l + pw, y1: Y(v), y2: Y(v), stroke: 'var(--hair)'}), sv('text', {x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end', text: fRate(v)})); } if (pts.some(d => d.rate === 0)) svg.append(sv('text', {x: m.l - 8, y: Y(0) + 4, 'text-anchor': 'end', text: '0'})); }
+  else { const st = niceStep(linTop, 5); for (let v = 0; v <= linTop + 1e-9; v += st) svg.append(sv('line', {x1: m.l, x2: m.l + pw, y1: Y(v), y2: Y(v), stroke: v === 0 ? 'var(--base)' : 'var(--hair)'}), sv('text', {x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end', text: fInt(v)})); }
+  const xst = [50, 100, 200].find(st => pw / ((x1 - x0) / st) >= 44) || 200;
+  for (let v = Math.ceil(x0 / xst) * xst; v <= x1; v += xst) svg.append(sv('line', {x1: X(v), x2: X(v), y1: m.t + ph, y2: m.t + ph + 4, stroke: 'var(--base)'}), sv('text', {x: X(v), y: m.t + ph + 18, 'text-anchor': 'middle', text: fInt(v)}));
+  svg.append(sv('text', {x: m.l + pw / 2, y: H - 4, 'text-anchor': 'middle', text: `${ix} score (lower = more disadvantaged)`}));
+  const st = winVal(S, meas, 'q', id, 0, w); if (st && st.p > 0) { const qr = st.c / st.p * 1e5; if (qr > 0 || !logY) { svg.append(sv('line', {x1: m.l, x2: m.l + pw, y1: Y(qr), y2: Y(qr), stroke: 'var(--ref)', 'stroke-dasharray': '5 4'}), sv('text', {x: m.l + pw - 4, y: Y(qr) - 5, 'text-anchor': 'end', class: 'endlab', text: 'Queensland ' + fRate(qr)})); } }
+  const pmax = Math.max(...pts.map(d => d.p)), R = d => 2.5 + 7 * Math.sqrt(d.p / pmax);
+  const tip = el('div', {class: 'tip', hidden: ''});
+  pts.slice().sort((a, b) => b.p - a.p).forEach(d => {
+    const small = d.p < 5000, c = sv('circle', {cx: X(d.s), cy: Y(d.rate), r: R(d), fill: small ? 'none' : 'var(--accent)', 'fill-opacity': .55, stroke: 'var(--accent)', 'stroke-width': small ? 1.4 : 1, tabindex: 0, style: 'cursor:pointer'});
+    const show = () => { tip.textContent = ''; tip.append(el('div', {class: 'h', text: d.name}), el('div', {class: 'r'}, el('b', {text: fRate(d.rate)}), el('span', {text: 'per 100,000'})), el('div', {class: 'r'}, el('b', {text: fInt(d.s)}), el('span', {text: ix + ' score'})), el('div', {class: 'r'}, el('b', {text: fInt(d.c)}), el('span', {text: measUnit(meas)})), el('div', {class: 'r'}, el('b', {text: fInt(d.p)}), el('span', {text: measDenom(meas)}))); tip.hidden = false; const px = X(d.s) / W * host.clientWidth, tw = tip.offsetWidth; tip.style.left = (px + 14 + tw > host.clientWidth ? Math.max(0, px - tw - 14) : px + 14) + 'px'; tip.style.top = Math.max(0, Y(d.rate) / H * host.clientHeight - 20) + 'px'; };
+    c.addEventListener('pointerenter', show); c.addEventListener('focus', show); c.addEventListener('pointerleave', () => { tip.hidden = true; }); c.addEventListener('blur', () => { tip.hidden = true; });
+    const go = () => { state.loc = {k: geo, i: d.i}; locCombo.set(locName(state.loc)); location.hash = 'trends'; };
+    c.addEventListener('click', go); c.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    svg.append(c);
+  });
+  host.append(svg, tip);
+  $('#s-leg').textContent = ''; $('#s-leg').append(el('span', null, (() => { const i = el('i', {class: 'sw'}); i.style.background = 'var(--accent)'; i.style.borderRadius = '50%'; return i; })(), document.createTextNode('5,000 or more')), el('span', null, (() => { const i = el('i', {class: 'sw'}); i.style.border = '1.5px solid var(--accent)'; i.style.borderRadius = '50%'; i.style.background = 'transparent'; return i; })(), document.createTextNode('Fewer than 5,000')), el('span', null, (() => { const i = el('i'); i.style.color = 'var(--ref)'; i.style.borderTopStyle = 'dashed'; return i; })(), document.createTextNode('Queensland rate')));
+  const sp = spearman(pts.map(d => d.s), pts.map(d => d.rate));
+  const dirTxt = r => Math.abs(r) < 0.1 ? 'little or no association' : (r < 0 ? 'higher rates in more disadvantaged areas' : 'higher rates in less disadvantaged areas');
+  $('#s-stat').append(el('b', {text: `Spearman rank correlation ${sp.r.toFixed(2)} (95% CI ${sp.lo.toFixed(2)} to ${sp.hi.toFixed(2)}), ${sp.n} areas: `}), document.createTextNode(dirTxt(sp.r) + '. Each area counts equally, whatever its population.'));
+  /* fifths */
+  const F = fifths(pts), lab = ['Most disadvantaged fifth', 'Second', 'Middle', 'Fourth', 'Least disadvantaged fifth'], Ptot = F.reduce((t, g) => t + g.p, 0);
+  $('#s-s2').textContent = `${area.charAt(0).toUpperCase() + area.slice(1)}s ranked by ${ix} score and grouped into five groups of about equal population. Each bar is the combined rate for the group (all ${measUnit(meas)} ÷ all people × 100,000), so small areas carry little weight. Groups follow area boundaries, so with LGAs a few large councils (Brisbane, Gold Coast) can make up a whole group; police divisions give more even groups for the offence rate.`;
+  hbars($('#s-fifths'), F.map((g, j) => ({label: lab[j], bars: [{v: g.rate, color: `var(--sei-${5 - j})`, text: g.rate == null ? 'n/a' : fRate(g.rate) + ` \u00B7 ${g.n} area${g.n === 1 ? '' : 's'}, ${Math.round(g.p / Ptot * 100)}% of people`}]})));
+  if (F[0].rate && F[4].rate) $('#s-fifths').append(el('p', {class: 'sub', style: 'margin-top:8px', text: `The most disadvantaged fifth has ${(F[0].rate / F[4].rate).toFixed(1)} times the rate of the least disadvantaged fifth.`}));
+  /* all four indexes */
+  $('#s-s3').textContent = `The same ${measName(meas)} against each SEIFA index. Rate ratio compares the most with the least disadvantaged fifth.`;
+  const tb = el('tbody');
+  for (let kk = 0; kk < 4; kk++) { const q = collect(kk), r = spearman(q.map(d => d.s), q.map(d => d.rate)), f = fifths(q); tb.append(el('tr', null, el('td', {title: SE.indexes[kk].name, text: SEIFA_SHORT[kk] + ': ' + ['disadvantage', 'advantage and disadvantage', 'economic resources', 'education and occupation'][kk]}), el('td', {class: 'num', text: r ? `${r.r.toFixed(2)} (${r.lo.toFixed(2)} to ${r.hi.toFixed(2)})` : 'n/a'}), el('td', {class: 'num', text: f[0].rate && f[4].rate ? (f[0].rate / f[4].rate).toFixed(1) : 'n/a'}))); }
+  $('#s-corr').append(el('div', {class: 'tblwrap'}, el('table', null, el('thead', null, el('tr', null, el('th', {text: 'Index'}), el('th', {class: 'num', text: 'Spearman (95% CI)'}), el('th', {class: 'num', text: 'Ratio'}))), tb)));
+  simpleTable($('#s-tbl'), ['Area', ix + ' score', 'Rate per 100,000', measUnit(meas).replace(/^./, c => c.toUpperCase()), measDenom(meas).replace(/^./, c => c.toUpperCase())],
+    pts.slice().sort((a, b) => a.s - b.s).map(d => [d.name, fInt(d.s), fRate(d.rate), fInt(d.c), fInt(d.p)]), pts.slice().sort((a, b) => a.s - b.s).map(d => ['"' + d.name + '"', d.s, d.rate.toFixed(2), d.c, d.p]));
+}
+
 /* ---------- routing & wiring ---------- */
-const VIEWS = ['trends', 'changes', 'map', 'funnel', 'mix', 'victims', 'about'];
+const VIEWS = ['trends', 'changes', 'map', 'funnel', 'mix', 'seifa', 'victims', 'about'];
 let locCombo;
 function fatal(e) { const f = $('#fatal'); f.hidden = false; f.textContent = (e && e.message ? e.message : String(e)) + '. If you opened this page straight from a folder, serve it through a web server instead (for example: python3 -m http.server).'; }
 function route() {
@@ -1532,17 +1819,18 @@ function route() {
   $$('nav.tabs a').forEach(a => { if (a.dataset.view === v) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   render();
 }
-function render() { if (!META) return; if (state.view === 'trends') renderTrends(); else if (state.view === 'changes') renderChanges(); else if (state.view === 'map') renderMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') { mixCombo.set(locName(state.loc)); renderMix(); } else if (state.view === 'victims') renderVictims(); else renderAbout(); }
+function render() { if (!META) return; if (state.view === 'trends') renderTrends(); else if (state.view === 'changes') renderChanges(); else if (state.view === 'map') renderMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') { mixCombo.set(locName(state.loc)); renderMix(); } else if (state.view === 'victims') renderVictims(); else if (state.view === 'seifa') renderSeifa(); else renderAbout(); }
 async function init() {
   try { [META, POP] = await Promise.all([getJSON('meta.json'), getJSON('pop.json')]); } catch (e) { return fatal(e); }
   T = META.months;
-  $('#tagline').textContent = `Reported offences and offenders per 100,000 population, January ${META.start_year} to ${monthLabel(T - 1)}`;
-  $('#foot').textContent = `Sources: Queensland Police Service open data (offences, offenders, division boundaries); Australian Bureau of Statistics (population, LGA boundaries). Built ${META.built}.`;
+  $('#tagline').textContent = `Reported offences, offenders and victims per 100,000 population, January ${META.start_year} to ${monthLabel(T - 1)}`;
+  $('#foot').textContent = `Sources: Queensland Police Service open data (offences, offenders, victims, division boundaries); Australian Bureau of Statistics (population, LGA boundaries). Built ${META.built}.`;
   const fillOff = sel => { for (const o of META.offences) sel.append(el('option', {value: o.id, text: '   '.repeat(o.lvl) + o.name})); };
   $$('.offsel').forEach(s => { fillOff(s); s.addEventListener('change', () => { setOff(+s.value); render(); }); });
   const co = $('#c-off'); co.append(el('option', {value: 'main', text: 'Main categories (' + META.offences.filter(o => o.lvl <= 1).length + ')'}), el('option', {value: 'allsub', text: 'All categories and sub-categories (' + META.offences.length + ')'})); fillOff(co);
   const cb = $('#c-base'); [1, 2, 3, 5, 10, 20].forEach(y => { if (y < META.win_end.length) cb.append(el('option', {value: y, text: (y === 1 ? 'the previous 12 months' : y + ' years earlier') + ' (to ' + monthLabel(META.win_end[y]) + ')'})); });
-  $$('#m-win, #f-win').forEach(mw => META.win_end.forEach((e, k) => mw.append(el('option', {value: k, text: monthLabel(e)}))));
+  $$('#m-win, #f-win, #s-win').forEach(mw => META.win_end.forEach((e, k) => mw.append(el('option', {value: k, text: monthLabel(e)}))));
+  $$('#v-seifa select:not(.offsel), #v-seifa input').forEach(i => i.addEventListener('change', renderSeifa));
   const xp = $('#x-parent'); xp.append(el('option', {value: 'all', text: 'All offences, by division'}));
   META.offences.filter(o => META.offences.some(c => c.parent === o.id)).forEach(o => xp.append(el('option', {value: o.id, text: '\u00A0\u00A0\u00A0'.repeat(o.lvl) + o.name})));
   mixCombo = combo($('#x-loc'), {initial: 'Queensland', placeholder: 'Search LGAs and police divisions', groups: () => placeGroups(true), onPick: it => { state.loc = it.loc; locCombo.set(locName(it.loc)); renderMix(); }});
@@ -1554,10 +1842,19 @@ async function init() {
   $$('#v-changes select, #v-changes input').forEach(i => i.addEventListener('change', renderChanges));
   $$('#m-meas, #m-win, #m-show, input[name="m-geo"]').forEach(i => i.addEventListener('change', renderMap));
   window.addEventListener('hashchange', route);
-  let rz; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => { if (state.view === 'trends') renderTrends(); else if (state.view === 'map') drawMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') renderMix(); else if (state.view === 'victims') renderVictims(); }, 120); }).observe($('main'));
+  let rz; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => { if (state.view === 'trends') renderTrends(); else if (state.view === 'map') drawMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') renderMix(); else if (state.view === 'victims') renderVictims(); else if (state.view === 'seifa') renderSeifa(); }, 120); }).observe($('main'));
   const retheme = () => { if (state.view === 'map' && M.ready) renderMap(); };
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', retheme);
   new MutationObserver(retheme).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  const DEFAULTS = snapControls($('main')).filter(x => !x.e.closest('#v-victims'));
+  $('#reset').addEventListener('click', () => {
+    restoreControls(DEFAULTS); restoreControls(VI_DEFAULTS);
+    setOff(0); state.loc = {k: 'q', i: 0}; locCombo.set('Queensland'); mixCombo.set('Queensland');
+    const mf = $('#m-find input'); if (mf) mf.value = '';
+    viqLoc = {k: 'q', i: 0}; if (viqCombo) { viqCombo.set('Queensland'); $('#viq-o').value = 0; }
+    M.sel = null; if (M.ready) fitBox(layerBox(M.layers[mapGeo()]));
+    render();
+  });
   route();
   setTimeout(() => { getSummary().catch(() => {}); }, 1500);
 }

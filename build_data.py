@@ -8,6 +8,7 @@ Inputs (all in --raw):
     LGA_Reported_Offences_Number.csv / _Rates.csv
     division_Reported_Offences_Number.csv / _Rates.csv
     QLD_Reported_Offenders_Number.csv, LGA_Reported_Offenders_Number.csv
+    QLD_Reported_victims_Number.xlsx, LGA_Reported_victims_Number.xlsx
     QPS_DIVISIONS.zip (shapefile; or already-extracted QPS_DIVISIONS.shp/.dbf)
   ABS:
     3101053.xlsx            ERP by single year of age, Queensland (National, state and territory population, Table 53)
@@ -17,7 +18,7 @@ Inputs (all in --raw):
 Usage:
   python3 build_data.py --raw RAW_DIR --out site/data            # process files already in RAW_DIR
   python3 build_data.py --raw RAW_DIR --out site/data --download # fetch the QPS + ABS files first
-  use  --download-qps instead of --download to fetch only the monthly QPS files (ABS and boundary files already in RAW_DIR)
+  use  --download-qps instead of --download to fetch only the ten monthly QPS files (ABS and boundary files already in RAW_DIR)
   add  --tidy DIR     to also write long-format analysis files (csv.gz)
   add  --report FILE  to also write a markdown report on the latest month
 
@@ -37,6 +38,8 @@ DOWNLOADS = {
     "division_Reported_Offences_Rates.csv": QPS + "division_Reported_Offences_Rates.csv",
     "QLD_Reported_Offenders_Number.csv": QPS + "QLD_Reported_Offenders_Number.csv",
     "LGA_Reported_Offenders_Number.csv": QPS + "LGA_Reported_Offenders_Number.csv",
+    "QLD_Reported_victims_Number.xlsx": QPS + "QLD_Reported_victims_Number.xlsx",
+    "LGA_Reported_victims_Number.xlsx": QPS + "LGA_Reported_victims_Number.xlsx",
     "QPS_DIVISIONS.zip": "https://open-crime-data.s3-ap-southeast-2.amazonaws.com/document/QPS_DIVISIONS.zip",
     "3101053.xlsx": "https://www.abs.gov.au/statistics/people/population/national-state-and-territory-population/latest-release/3101053.xlsx",
     # The two ABS files below are release-specific; update the URLs when ABS publishes a new release.
@@ -110,7 +113,7 @@ def download(raw, qps_only=False):
     import urllib.request
     os.makedirs(raw, exist_ok=True)
     for name, url in DOWNLOADS.items():
-        if qps_only and not name.endswith(".csv"):
+        if qps_only and not (name.endswith(".csv") or name.endswith("_victims_Number.xlsx")):
             continue
         dest = os.path.join(raw, name)
         log("downloading", name)
@@ -142,6 +145,21 @@ def read_qps(path):
     df = pd.read_csv(path, header=None, skiprows=1, names=names, encoding="utf-8-sig")
     df["t"] = df["Month Year"].map(month_index)
     return df[df["t"] >= 0].copy()
+
+
+def read_victims(path, key=None):
+    """QPS victim workbooks: sheet 1 = offences against the person by Age (Adult = 18+, Juvenile = 0-17) and Sex;
+    sheet 2 = all victims (offences against the person, unlawful entry, unlawful use of a motor vehicle), no age or sex.
+    'Month Year' is a date; trailing unnamed row-id columns are dropped."""
+    sheets = pd.read_excel(path, sheet_name=None)
+    a, b = list(sheets.values())[:2]
+    out = []
+    for df in (a, b):
+        df = df.loc[:, [c for c in df.columns if not str(c).startswith("Unnamed") and str(c) != "None"]].copy()
+        d = pd.to_datetime(df["Month Year"])
+        df["t"] = (d.dt.year - START_YEAR) * 12 + d.dt.month - 1
+        out.append(df[df["t"] >= 0].copy())
+    return out
 
 
 def implied_pop(num, rate, cols):
@@ -477,8 +495,13 @@ def write_tidy(folder, c):
     months = [month_str(t) for t in range(T)]
     NO = len(offs)
 
-    def frame(geo_labels, loc_labels, counts, pops, extra=None):
-        """counts: (NO, L, T); pops: (L, T). Row order: location, offence, month."""
+    def frame(geo_labels, loc_labels, counts, pops, extra=None, idx=None):
+        """counts: (NO, L, T); pops: (L, T). Row order: location, offence, month. idx: subset of offence ids."""
+        offs_ = offs if idx is None else [offs[k] for k in idx]
+        counts = counts if idx is None else counts[idx]
+        names_ = [o["name"] for o in offs_]
+        parent_ = [names[o["parent"]] if o["parent"] is not None else "" for o in offs_]
+        NO = len(offs_)
         L = len(loc_labels)
         cnt = np.transpose(counts, (1, 0, 2)).reshape(-1)
         pp = np.repeat(pops[:, None, :], NO, axis=1).reshape(-1)
@@ -490,9 +513,9 @@ def write_tidy(folder, c):
             "geography": pd.Categorical.from_codes(pd.factorize(np.array(geo_labels, dtype=object))[0][loc], list(pd.unique(pd.Series(geo_labels)))),
             "location": pd.Categorical.from_codes(loc, loc_labels),
             "month": pd.Categorical.from_codes(np.tile(np.arange(T), L * NO), months),
-            "offence": pd.Categorical.from_codes(off, names),
-            "offence_level": np.array([o["lvl"] for o in offs], np.int8)[off],
-            "parent_offence": pd.Categorical.from_codes(pd.factorize(np.array(parent, dtype=object))[0][off], list(pd.unique(pd.Series(parent)))),
+            "offence": pd.Categorical.from_codes(off, names_),
+            "offence_level": np.array([o["lvl"] for o in offs_], np.int8)[off],
+            "parent_offence": pd.Categorical.from_codes(pd.factorize(np.array(parent_, dtype=object))[0][off], list(pd.unique(pd.Series(parent_)))),
         })
         if extra:
             for k, v in extra.items():
@@ -523,6 +546,24 @@ def write_tidy(folder, c):
             df["offenders"] = cnt; df["population"] = np.round(pp, 1); df["rate_per_100k"] = np.round(rate, 3)
             parts.append(df)
     out["offenders_qld_lga.csv.gz"] = pd.concat(parts, ignore_index=True)
+    # victims: Queensland + LGAs; all victims (all ages, persons) for every offence with victim data, and by age group and sex
+    # for offences against the person. Juvenile victims are aged 0-17 (QPS definition).
+    v_all = [o["id"] for o in offs if o.get("vic")]; v_as = [o["id"] for o in offs if o.get("vic") == 2]
+    parts = []
+    counts = np.concatenate([c["V_q"][""][:, None, :], c["V_l"][""]], axis=1)
+    pops = np.vstack([c["pop_q"][None, :], c["pop_l"]])
+    df, cnt, pp, rate = frame(geo, loc_labels, counts, pops, idx=v_all)
+    df["age_group"] = "All ages"; df["sex"] = "Persons"; df["victims"] = cnt; df["population"] = np.round(pp, 1); df["rate_per_100k"] = np.round(rate, 3)
+    parts.append(df)
+    for a, alabel in (("a", "Adult (18+)"), ("j", "Juvenile (0-17)")):
+        for sx, slabel in (("", "Persons"), ("m", "Male"), ("f", "Female")):
+            counts = np.concatenate([c["V_q"][a + sx][:, None, :], c["V_l"][a + sx]], axis=1)
+            pops = np.vstack([c["den"]["qv" + a + sx][None, :], c["den"]["lv" + a + sx]])
+            df, cnt, pp, rate = frame(geo, loc_labels, counts, pops, idx=v_as)
+            df["age_group"] = alabel; df["sex"] = slabel
+            df["victims"] = cnt; df["population"] = np.round(pp, 1); df["rate_per_100k"] = np.round(rate, 3)
+            parts.append(df)
+    out["victims_qld_lga.csv.gz"] = pd.concat(parts, ignore_index=True)
     for name, df in out.items():
         path = os.path.join(folder, name)
         df.to_csv(path, index=False, compression={"method": "gzip", "compresslevel": 6})
@@ -621,16 +662,27 @@ def main():
     ln, lr = read_qps(P("LGA_Reported_Offences_Number.csv")), read_qps(P("LGA_Reported_Offences_Rates.csv"))
     dn, dr = read_qps(P("division_Reported_Offences_Number.csv")), read_qps(P("division_Reported_Offences_Rates.csv"))
     qo, lo = read_qps(P("QLD_Reported_Offenders_Number.csv")), read_qps(P("LGA_Reported_Offenders_Number.csv"))
+    qv_as, qv_all = read_victims(P("QLD_Reported_victims_Number.xlsx"))
+    lv_as, lv_all = read_victims(P("LGA_Reported_victims_Number.xlsx"))
     cols = [c for _, c in TREE]
+    V_AS = [c for c in cols if c in qv_as.columns]      # offences with victims by age and sex (offences against the person)
+    V_ALL = [c for c in cols if c in qv_all.columns]    # offences with victim totals (adds unlawful entry, unlawful use of a motor vehicle)
+    for df, nm, want in [(qv_as, "QLD victims", V_AS), (lv_as, "LGA victims", V_AS), (qv_all, "QLD victims (all)", V_ALL), (lv_all, "LGA victims (all)", V_ALL)]:
+        extra = set(df.columns) - set(cols) - {"Month Year", "LGA Name", "Age", "Sex", "t"}
+        assert not extra and set(want) <= set(df.columns), (nm, extra)
+    assert len(V_AS) >= 20 and "Unlawful Entry" in V_ALL, (V_AS, V_ALL)
+    log("victim offence columns: by age and sex", len(V_AS), "| totals", len(V_ALL))
     for df, nm in [(qn, "QLD offences"), (ln, "LGA offences"), (dn, "division offences"), (qo, "QLD offenders"), (lo, "LGA offenders")]:
         have = set(df.columns) - {"Month Year", "LGA Name", "Division", "Age", "Sex", "_rowid", "t"}
         assert have == set(cols), (nm, have ^ set(cols))
-    T = int(min(qn["t"].max(), ln["t"].max(), dn["t"].max(), qo["t"].max(), lo["t"].max())) + 1
-    for df in (qn, qr, ln, lr, dn, dr, qo, lo):
+    T = int(min(qn["t"].max(), ln["t"].max(), dn["t"].max(), qo["t"].max(), lo["t"].max(),
+                qv_as["t"].max(), lv_as["t"].max(), qv_all["t"].max(), lv_all["t"].max())) + 1
+    for df in (qn, qr, ln, lr, dn, dr, qo, lo, qv_as, lv_as, qv_all, lv_all):
         df.drop(df[df["t"] >= T].index, inplace=True)
     lgas = sorted(ln["LGA Name"].unique())
     divs = sorted(dn["Division"].unique())
     assert sorted(lo["LGA Name"].unique()) == lgas
+    assert sorted(lv_as["LGA Name"].unique()) == lgas and sorted(lv_all["LGA Name"].unique()) == lgas, "victim LGA names differ"
     log(f"months={T} (Jan {START_YEAR} to {MON[(T-1)%12]} {START_YEAR+(T-1)//12}), LGAs={len(lgas)}, divisions={len(divs)}")
 
     # ---- populations implied by QPS rates (offence-rate denominators)
@@ -673,11 +725,13 @@ def main():
         j_old = [sy[y][10:17].sum() for y in yrs]; j_new = [sy[y][10:18].sum() for y in yrs]
         a_old = [sy[y][17:].sum() for y in yrs];   a_new = [sy[y][18:].sum() for y in yrs]
         den["qj" + sx] = pick(monthly_from_june(yrs, j_old, T), monthly_from_june(yrs, j_new, T))
+        den["qvj" + sx] = monthly_from_june(yrs, [sy[y][0:18].sum() for y in yrs], T)   # victims: juvenile = 0-17 throughout
+        den["qva" + sx] = monthly_from_june(yrs, [sy[y][18:].sum() for y in yrs], T)
         den["qa" + sx] = pick(monthly_from_june(yrs, a_old, T), monthly_from_june(yrs, a_new, T))
         # share of the 15-19 group that is juvenile under each definition (Queensland-wide, same sex, by year)
         sh_old = {y: sy[y][15:17].sum() / sy[y][15:20].sum() for y in yrs}
         sh_new = {y: sy[y][15:18].sum() / sy[y][15:20].sum() for y in yrs}
-        lj = np.zeros((len(lgas), T)); laa = np.zeros((len(lgas), T))
+        lj = np.zeros((len(lgas), T)); laa = np.zeros((len(lgas), T)); lvj = np.zeros((len(lgas), T)); lva = np.zeros((len(lgas), T))
         for i, name in enumerate(lgas):
             d = la[la["key"] == norm_lga(name)].set_index("year").sort_index()
             ys = list(d.index)
@@ -685,12 +739,18 @@ def main():
             so = np.array([sh_old[y] for y in ys]); sn = np.array([sh_new[y] for y in ys])
             lj[i] = pick(monthly_from_june(ys, p1014 + p1519 * so, T), monthly_from_june(ys, p1014 + p1519 * sn, T))
             laa[i] = pick(monthly_from_june(ys, p20 + p1519 * (1 - so), T), monthly_from_june(ys, p20 + p1519 * (1 - sn), T))
+            p09 = d["0-4"].to_numpy(float) + d["5-9"].to_numpy(float)
+            lvj[i] = monthly_from_june(ys, p09 + p1014 + p1519 * sn, T)
+            lva[i] = monthly_from_june(ys, p20 + p1519 * (1 - sn), T)
         den["lj" + sx], den["la" + sx] = lj, laa
+        den["lvj" + sx], den["lva" + sx] = lvj, lva
     log("ABS Qld single-year ERP years", yrs[0], "-", yrs[-1], "| ABS LGA ERP years", lyrs[0], "-", lyrs[-1])
     chk = (den["lj"].sum(0) + den["la"].sum(0)) / (den["qj"] + den["qa"])
     log("sum of LGA 10+ denominators / Qld 10+ denominator: min %.4f max %.4f" % (chk.min(), chk.max()))
     chk2 = (den["qjm"] + den["qjf"]) / den["qj"]
     log("Qld male + female juvenile denominator / persons: min %.5f max %.5f" % (chk2.min(), chk2.max()))
+    chk3 = (den["lvj"].sum(0) + den["lva"].sum(0)) / (den["qvj"] + den["qva"])
+    log("sum of LGA all-age victim denominators / Qld: min %.4f max %.4f" % (chk3.min(), chk3.max()))
     den_qj, den_qa, den_lj, den_la = den["qj"], den["qa"], den["lj"], den["la"]
 
     # ---- offender matrices: persons (all sexes, including sex not stated), males, females
@@ -709,6 +769,11 @@ def main():
                     v = np.zeros(T); v[g.index.to_numpy()] = g.to_numpy(float); res[a + sx] = v
         return res
 
+    def victim_total(df, key, areas, col):
+        if key:
+            return to_matrix(df.groupby([key, "t"], sort=False)[col].sum().reset_index(), key, areas, col, T)
+        g = df.groupby("t", sort=False)[col].sum(); v = np.zeros(T); v[g.index.to_numpy()] = g.to_numpy(float); return v
+
     # ---- summary windows (12 months ending at the latest month, stepping back a year at a time)
     nwin = (T - 12) // 12 + 1
     win_end = [T - 1 - 12 * k for k in range(nwin)]
@@ -719,12 +784,16 @@ def main():
     def wmean(M):
         return np.stack([M[..., e - 11:e + 1].mean(-1) for e in win_end], -1)
 
-    summary = {"c_q": [], "c_l": [], "c_d": [], "a_q": [], "j_q": [], "a_l": [], "j_l": []}
+    summary = {"c_q": [], "c_l": [], "c_d": [], "a_q": [], "j_q": [], "a_l": [], "j_l": [],
+               "v_q": [], "v_l": [], "va_q": [], "vj_q": [], "va_l": [], "vj_l": []}
     sizes = []
     offences = []
     NO = len(TREE)
     C_q = np.zeros((NO, T), np.int32); C_l = np.zeros((NO, len(lgas), T), np.int32); C_d = np.zeros((NO, len(divs), T), np.int32)
     O_q = {k: np.zeros((NO, T), np.int32) for k in OTAGS}; O_l = {k: np.zeros((NO, len(lgas), T), np.int32) for k in OTAGS}
+    VTAGS = [""] + OTAGS                                 # '' = all victims; a, am, af, j, jm, jf = by age group and sex
+    V_q = {k: np.zeros((NO, T), np.int32) for k in VTAGS}; V_l = {k: np.zeros((NO, len(lgas), T), np.int32) for k in VTAGS}
+    vic_level = []
     for oi, (lvl, col) in enumerate(TREE):
         mq = np.zeros(T); mq[qn["t"].to_numpy()] = qn[col].to_numpy(float)
         ml = to_matrix(ln, "LGA Name", lgas, col, T)
@@ -738,13 +807,33 @@ def main():
         for k in OTAGS:
             f["q" + k] = sparse(oq[k])
             f["l" + k] = [sparse(r) for r in ol[k]]
+        vl = 2 if col in V_AS else 1 if col in V_ALL else 0
+        vic_level.append(vl)
+        if vl:
+            vq, vlm = victim_total(qv_all, None, None, col), victim_total(lv_all, "LGA Name", lgas, col)
+            V_q[""][oi], V_l[""][oi] = vq, vlm
+            f["qv"] = sparse(vq); f["lv"] = [sparse(r) for r in vlm]
+            summary["v_q"].append(wsum(vq).astype(int).tolist()); summary["v_l"].append(wsum(vlm).astype(int).tolist())
+        else:
+            for k in ("v_q", "v_l"):
+                summary[k].append(None)
+        if vl == 2:
+            vqa, vla = offender_mats(qv_as, None, None, col), offender_mats(lv_as, "LGA Name", lgas, col)
+            for k in OTAGS:
+                V_q[k][oi], V_l[k][oi] = vqa[k], vla[k]
+                f["qv" + k] = sparse(vqa[k]); f["lv" + k] = [sparse(r) for r in vla[k]]
+            summary["va_q"].append(wsum(vqa["a"]).astype(int).tolist()); summary["vj_q"].append(wsum(vqa["j"]).astype(int).tolist())
+            summary["va_l"].append(wsum(vla["a"]).astype(int).tolist()); summary["vj_l"].append(wsum(vla["j"]).astype(int).tolist())
+        else:
+            for k in ("va_q", "vj_q", "va_l", "vj_l"):
+                summary[k].append(None)
         sizes.append(dump(f, os.path.join(out, "o", f"{oi}.json")))
         summary["c_q"].append(wsum(mq).astype(int).tolist())
         summary["c_l"].append(wsum(ml).astype(int).tolist())
         summary["c_d"].append(wsum(md).astype(int).tolist())
         summary["a_q"].append(wsum(oq["a"]).astype(int).tolist()); summary["j_q"].append(wsum(oq["j"]).astype(int).tolist())
         summary["a_l"].append(wsum(ol["a"]).astype(int).tolist()); summary["j_l"].append(wsum(ol["j"]).astype(int).tolist())
-        offences.append({"id": oi, "name": col.rstrip("'"), "lvl": lvl, "total": int(mq.sum())})
+        offences.append({"id": oi, "name": col.rstrip("'"), "lvl": lvl, "total": int(mq.sum()), "vic": vl})
     for i, o in enumerate(offences):  # parent pointers
         o["parent"] = next((j for j in range(i - 1, -1, -1) if offences[j]["lvl"] < o["lvl"]), None)
     summary["win_end"] = win_end
@@ -754,6 +843,12 @@ def main():
     summary["pj_q"] = [popround(x) for x in wmean(den_qj)]; summary["pa_q"] = [popround(x) for x in wmean(den_qa)]
     summary["pj_l"] = [[popround(x) for x in r] for r in wmean(den_lj)]
     summary["pa_l"] = [[popround(x) for x in r] for r in wmean(den_la)]
+    summary["pvj_q"] = [popround(x) for x in wmean(den["qvj"])]; summary["pva_q"] = [popround(x) for x in wmean(den["qva"])]
+    summary["pvj_l"] = [[popround(x) for x in r] for r in wmean(den["lvj"])]
+    summary["pva_l"] = [[popround(x) for x in r] for r in wmean(den["lva"])]
+    oap = cols.index("Offences Against the Person")
+    log("victims, offences against the person, all months: Qld %d | sum of LGAs / Qld %.4f | adult + juvenile / all %.4f" % (
+        V_q[""][oap].sum(), V_l[""][oap].sum() / max(1, V_q[""][oap].sum()), (V_q["a"][oap].sum() + V_q["j"][oap].sum()) / max(1, V_q[""][oap].sum())))
     s_sum = dump(summary, os.path.join(out, "summary.json"))
 
     pop = {"q": rle([popround(x) for x in pop_q]),
@@ -790,7 +885,7 @@ def main():
     log("sizes (bytes): meta", s_meta, "pop", s_pop, "summary", s_sum, "geo", s_geo,
         "offence files total", sum(sizes), "max", max(sizes))
 
-    ctx = dict(T=T, offences=offences, lgas=lgas, divs=divs, C_q=C_q, C_l=C_l, C_d=C_d, O_q=O_q, O_l=O_l,
+    ctx = dict(T=T, offences=offences, lgas=lgas, divs=divs, C_q=C_q, C_l=C_l, C_d=C_d, O_q=O_q, O_l=O_l, V_q=V_q, V_l=V_l,
                pop_q=pop_q, pop_l=pop_l, pop_d=pop_d, den=den)
     if args.report:
         write_report(args.report, ctx)
