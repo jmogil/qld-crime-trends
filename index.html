@@ -96,6 +96,17 @@ input[type=number]{width:92px}
 .seg input{position:absolute;opacity:0;pointer-events:none}
 .seg input:checked+label{background:var(--accent);color:var(--accent-ink)}
 .seg input:focus-visible+label{outline:2px solid var(--accent);outline-offset:-2px}
+.mapmode{display:grid;grid-template-columns:1fr 1fr;max-width:640px;border:1px solid var(--base);border-radius:10px;overflow:hidden;background:var(--surface);margin-bottom:12px}
+.mapmode input{position:absolute;opacity:0;pointer-events:none}
+.mapmode label{display:flex;flex-direction:column;gap:2px;padding:10px 14px;cursor:pointer;color:var(--ink-2);border-left:1px solid var(--hair)}
+.mapmode label:first-of-type{border-left:0}
+.mapmode label b{font-size:15px;color:var(--ink)}
+.mapmode label span{font-size:12.5px}
+.mapmode input:checked+label{background:var(--accent);color:var(--accent-ink)}
+.mapmode input:checked+label b{color:var(--accent-ink)}
+.mapmode input:focus-visible+label{outline:2px solid var(--accent);outline-offset:-2px}
+.mapmode label:hover{background:var(--accent-wash)}
+.mapmode input:checked+label:hover{background:var(--accent)}
 .check{display:inline-flex;align-items:center;gap:6px;height:36px;color:var(--ink-2);cursor:pointer}
 .card{background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:16px 18px}
 .card h2{margin:0;font-size:15px;font-weight:700;text-wrap:balance}
@@ -191,6 +202,9 @@ tr.click:hover td{background:var(--accent-wash)}
 footer{color:var(--muted);font-size:12px;padding:0 0 30px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media (max-width:520px){
+#m-legend .sw span{font-size:10.5px;letter-spacing:-.2px}
+.mapmode label{padding:8px 10px}
+.mapmode label b{font-size:14px}
 #v-victims .seg label,#v-trends .seg label,#v-seifa .seg label{padding:0 6px;font-size:12px}
 #v-trends .seg,#v-seifa .seg{flex-wrap:wrap}
 .hb-row{grid-template-columns:minmax(80px,112px) 1fr}
@@ -316,21 +330,28 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
 
   <!-- ===================== MAP ===================== -->
   <section id="v-map" class="view" hidden>
+    <div class="mapmode" role="radiogroup" aria-label="What the map shows">
+      <input type="radio" name="m-mode" id="m-mode-c" value="crime" checked><label for="m-mode-c"><b>Crime figures</b><span>Offence, offender and victim rates (QPS)</span></label>
+      <input type="radio" name="m-mode" id="m-mode-s" value="seifa"><label for="m-mode-s"><b>Disadvantage</b><span>Socio-economic indexes (ABS SEIFA 2021)</span></label>
+    </div>
     <div class="filters">
-      <div class="field f-off"><label for="m-off">Crime type</label><select id="m-off" class="offsel"></select></div>
-      <div class="field"><label for="m-meas">Show</label>
-        <select id="m-meas"><optgroup label="Crime rates"><option value="off">Offence rate</option><option value="adult">Adult offender rate</option><option value="juv">Juvenile offender rate</option><option value="all">Offender rate, all aged 10+</option><option value="vic">Victim rate</option><option value="vadult">Adult victim rate</option><option value="vjuv">Juvenile victim rate (aged 0&ndash;17)</option></optgroup><optgroup label="Disadvantage (ABS SEIFA 2021)"><option value="seifa-0">IRSD: relative socio-economic disadvantage</option><option value="seifa-1">IRSAD: relative advantage and disadvantage</option><option value="seifa-2">IER: economic resources</option><option value="seifa-3">IEO: education and occupation</option></optgroup></select></div>
+      <div class="field f-off m-crime"><label for="m-off">Crime type</label><select id="m-off" class="offsel"></select></div>
+      <div class="field m-crime"><label for="m-meas">Rate</label>
+        <select id="m-meas"><option value="off">Offence rate</option><option value="adult">Adult offender rate</option><option value="juv">Juvenile offender rate</option><option value="all">Offender rate, all aged 10+</option><option value="vic">Victim rate</option><option value="vadult">Adult victim rate</option><option value="vjuv">Juvenile victim rate (aged 0&ndash;17)</option></select></div>
+      <div class="field m-seifa" hidden><label for="m-sidx">SEIFA index</label>
+        <select id="m-sidx"><option value="0">IRSD: relative socio-economic disadvantage</option><option value="1">IRSAD: relative advantage and disadvantage</option><option value="2">IER: economic resources</option><option value="3">IEO: education and occupation</option></select></div>
       <div class="field"><span class="lab">Areas</span>
         <div class="seg" role="radiogroup" aria-label="Areas">
           <input type="radio" name="m-geo" id="m-geo-d" value="d" checked><label for="m-geo-d">Police divisions</label>
           <input type="radio" name="m-geo" id="m-geo-l" value="l"><label for="m-geo-l">LGAs</label>
         </div></div>
-      <div class="field"><label for="m-win">12 months to</label><select id="m-win"></select></div>
-      <div class="field"><label for="m-show">Colour by</label>
+      <div class="field m-crime"><label for="m-win">12 months to</label><select id="m-win"></select></div>
+      <div class="field m-crime"><label for="m-show">Colour by</label>
         <select id="m-show"><option value="rate">Rate per 100,000</option><option value="1">% change on a year earlier</option><option value="5">% change on 5 years earlier</option><option value="10">% change on 10 years earlier</option></select></div>
       <div class="field"><label for="m-find-in">Find a place</label><div class="combo" id="m-find"></div></div>
     </div>
-    <p class="caution-line"><b>Interpret rates for individual places with caution.</b> Many of the highest rates are in small, remote communities, where a few offences produce a very high rate. <a href="#about">Read the note in About the data</a></p>
+    <p class="caution-line m-crime"><b>Interpret rates for individual places with caution.</b> Many of the highest rates are in small, remote communities, where a few offences produce a very high rate. <a href="#about">Read the note in About the data</a></p>
+    <p class="caution-line m-seifa" hidden><b>You are viewing area disadvantage, not crime.</b> SEIFA scores rank areas using 2021 Census data; they describe areas, not individual residents. To compare disadvantage with crime rates, use the <a href="#seifa">Disadvantage tab</a>.</p>
     <div class="mapgrid">
       <div class="mapbox">
         <canvas id="m-canvas" tabindex="0" aria-label="Map of Queensland coloured by crime rate. Use the ranked list beside the map for the same figures as text."></canvas>
@@ -1019,11 +1040,12 @@ function quantBreaks(vals, n) {
 async function renderMap() {
   let S, G; try { [S, G] = await Promise.all([getSummary(), getGeo()]); } catch (e) { return fatal(e); }
   if (!M.ready) { M.layers.l = buildLayer(G.l); M.layers.d = buildLayer(G.d); M.ready = true; initMapEvents(); fitBox(layerBox(M.layers.d)); }
-  const meas = $('#m-meas').value, isSei = /^seifa/.test(meas);
+  const meas = $('#m-meas').value, isSei = $('input[name="m-mode"]:checked').value === 'seifa';
+  $$('#v-map .m-crime').forEach(e => { e.hidden = isSei; }); $$('#v-map .m-seifa').forEach(e => { e.hidden = !isSei; });
+  $('#m-canvas').setAttribute('aria-label', `Map of Queensland coloured by ${isSei ? 'SEIFA 2021 disadvantage score' : 'crime rate'}. Use the ranked list beside the map for the same figures as text.`);
   if (meas !== 'off' && !isSei && mapGeo() === 'd') $('#m-geo-l').checked = true;
   $('#m-geo-d').disabled = meas !== 'off' && !isSei;
-  ['#m-win', '#m-show', '#v-map .offsel'].forEach(q => { const e = $(q); if (e) e.disabled = isSei; });
-  if (isSei) return renderMapSeifa(S, +meas.split('-')[1]);
+  if (isSei) return renderMapSeifa(S, +$('#m-sidx').value);
   const geo = mapGeo(), feats = M.layers[geo], id = state.off, w = +$('#m-win').value, show = $('#m-show').value;
   const names = geo === 'l' ? META.lgas.map(shortLga) : META.divisions;
   if (M.sel && M.sel.k !== geo) M.sel = null;
@@ -1840,7 +1862,7 @@ async function init() {
   combo($('#m-find'), {placeholder: 'Search LGAs and police divisions', keep: false, groups: () => placeGroups(false), onPick: it => selectArea(it.loc.k, it.loc.i, true)});
   $$('#v-trends input[type=radio], #v-trends input[type=checkbox]').forEach(i => i.addEventListener('change', renderTrends));
   $$('#v-changes select, #v-changes input').forEach(i => i.addEventListener('change', renderChanges));
-  $$('#m-meas, #m-win, #m-show, input[name="m-geo"]').forEach(i => i.addEventListener('change', renderMap));
+  $$('#m-meas, #m-win, #m-show, #m-sidx, input[name="m-geo"], input[name="m-mode"]').forEach(i => i.addEventListener('change', renderMap));
   window.addEventListener('hashchange', route);
   let rz; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => { if (state.view === 'trends') renderTrends(); else if (state.view === 'map') drawMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') renderMix(); else if (state.view === 'victims') renderVictims(); else if (state.view === 'seifa') renderSeifa(); }, 120); }).observe($('main'));
   const retheme = () => { if (state.view === 'map' && M.ready) renderMap(); };
