@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Map classes: --seq-* = single-hue burgundy (CARTOColors Burg, light = low, dark = high, same in both themes); --div-* = ColorBrewer RdBu with a grey midpoint (blue = decrease, red = increase); --ord-* = Burg(7) for ordered categories. */
+/* Map classes: --seq-* = single-hue burgundy (CARTOColors Burg, light = low, dark = high, same in both themes); --div-* = ColorBrewer RdBu with a grey midpoint (blue = decrease, red = increase); --ord-* = viridis(7) for the ordered reporting-delay categories on the Victims tab. */
 /* Layout idea: one working surface per question (trend, biggest changes, map), filters in a single row above what they scope. */
 :root{
   color-scheme:light;
@@ -20,7 +20,7 @@
   --accent:#7d1d3f; --accent-ink:#ffffff; --accent-wash:#f6e9ee;
   --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948; --ref:#a39a9b;
   --inc:#cf3c3b; --dec:#256abf;
-  --seq-1:#ffc6c4; --seq-2:#f4a3a8; --seq-3:#e38191; --seq-4:#cc607d; --seq-5:#ad466c; --seq-6:#672044; --sei-1:#d1eeea; --sei-2:#a8dbd9; --sei-3:#68abb8; --sei-4:#3b738f; --sei-5:#2a5674; --ord-1:#ffc6c4; --ord-2:#f4a3a8; --ord-3:#e38191; --ord-4:#cc607d; --ord-5:#ad466c; --ord-6:#8b3058; --ord-7:#672044;
+  --seq-1:#ffc6c4; --seq-2:#f4a3a8; --seq-3:#e38191; --seq-4:#cc607d; --seq-5:#ad466c; --seq-6:#672044; --sei-1:#d1eeea; --sei-2:#a8dbd9; --sei-3:#68abb8; --sei-4:#3b738f; --sei-5:#2a5674; --ord-1:#440154; --ord-2:#443a83; --ord-3:#31688e; --ord-4:#21908c; --ord-5:#35b779; --ord-6:#8fd744; --ord-7:#fde725;
   --div-1:#2166ac; --div-2:#67a9cf; --div-3:#d1e5f0; --div-4:#d6d3d2; --div-5:#fddbc7; --div-6:#ef8a62; --div-7:#b2182b;
   --nodata:#e6e1df;
   --font:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -33,7 +33,7 @@
     --accent:#e58aa6; --accent-ink:#1c0d13; --accent-wash:#33202a;
     --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#0ca30c; --s7:#9085e9; --s8:#e66767; --ref:#6f6869;
     --inc:#e66767; --dec:#5598e7;
-    --seq-1:#ffc6c4; --seq-2:#f4a3a8; --seq-3:#e38191; --seq-4:#cc607d; --seq-5:#ad466c; --seq-6:#672044; --sei-1:#d1eeea; --sei-2:#a8dbd9; --sei-3:#68abb8; --sei-4:#3b738f; --sei-5:#2a5674; --ord-1:#ffc6c4; --ord-2:#f4a3a8; --ord-3:#e38191; --ord-4:#cc607d; --ord-5:#ad466c; --ord-6:#8b3058; --ord-7:#672044;
+    --seq-1:#ffc6c4; --seq-2:#f4a3a8; --seq-3:#e38191; --seq-4:#cc607d; --seq-5:#ad466c; --seq-6:#672044; --sei-1:#d1eeea; --sei-2:#a8dbd9; --sei-3:#68abb8; --sei-4:#3b738f; --sei-5:#2a5674; --ord-1:#440154; --ord-2:#443a83; --ord-3:#31688e; --ord-4:#21908c; --ord-5:#35b779; --ord-6:#8fd744; --ord-7:#fde725;
     --div-1:#2166ac; --div-2:#67a9cf; --div-3:#d1e5f0; --div-4:#5b5657; --div-5:#fddbc7; --div-6:#ef8a62; --div-7:#b2182b;
     --nodata:#2a2627;
   }
@@ -45,7 +45,7 @@
   --accent:#e58aa6; --accent-ink:#1c0d13; --accent-wash:#33202a;
   --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#0ca30c; --s7:#9085e9; --s8:#e66767; --ref:#6f6869;
   --inc:#e66767; --dec:#5598e7;
-  --seq-1:#ffc6c4; --seq-2:#f4a3a8; --seq-3:#e38191; --seq-4:#cc607d; --seq-5:#ad466c; --seq-6:#672044; --sei-1:#d1eeea; --sei-2:#a8dbd9; --sei-3:#68abb8; --sei-4:#3b738f; --sei-5:#2a5674; --ord-1:#ffc6c4; --ord-2:#f4a3a8; --ord-3:#e38191; --ord-4:#cc607d; --ord-5:#ad466c; --ord-6:#8b3058; --ord-7:#672044;
+  --seq-1:#ffc6c4; --seq-2:#f4a3a8; --seq-3:#e38191; --seq-4:#cc607d; --seq-5:#ad466c; --seq-6:#672044; --sei-1:#d1eeea; --sei-2:#a8dbd9; --sei-3:#68abb8; --sei-4:#3b738f; --sei-5:#2a5674; --ord-1:#440154; --ord-2:#443a83; --ord-3:#31688e; --ord-4:#21908c; --ord-5:#35b779; --ord-6:#8fd744; --ord-7:#fde725;
   --div-1:#2166ac; --div-2:#67a9cf; --div-3:#d1e5f0; --div-4:#5b5657; --div-5:#fddbc7; --div-6:#ef8a62; --div-7:#b2182b;
   --nodata:#2a2627;
 }
@@ -166,8 +166,8 @@ tr.click:hover td{background:var(--accent-wash)}
 .maplegend{border-top:1px solid var(--hair);padding:10px 14px;font-size:12px}
 .maplegend .sw{max-width:560px}
 .maplegend .t{font-weight:600;color:var(--ink-2);margin-bottom:5px}
-.maplegend .sw{display:flex;gap:2px}
-.maplegend .sw div{flex:1;min-width:44px}
+.maplegend .sw{display:flex;flex-wrap:wrap;gap:6px 2px}
+.maplegend .sw div{flex:1 0 44px;max-width:80px}
 .maplegend .sw i{display:block;height:10px;border-radius:2px}
 .maplegend .sw i.hatch{background:repeating-linear-gradient(45deg,var(--nodata) 0 3px,var(--base) 3px 4px)}
 .maplegend .sw span{display:block;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:2px;white-space:nowrap}
@@ -185,6 +185,18 @@ tr.click:hover td{background:var(--accent-wash)}
 .hb-bar{display:grid;grid-template-columns:1fr minmax(112px,auto);gap:8px;align-items:center}
 .hb-track{height:12px}
 .hb-track i{display:block;height:100%;border-radius:0 4px 4px 0}
+.dv{display:grid;gap:5px;margin-top:6px}
+.dv-row{display:grid;grid-template-columns:minmax(120px,240px) minmax(140px,1fr) minmax(150px,220px);gap:10px;align-items:center;font-size:13px}
+.dv-row.sub .dv-lab{padding-left:16px;color:var(--ink-2)}
+.dv-row.top .dv-lab{font-weight:700}
+.dv-track{position:relative;height:16px}
+.dv-track::before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;border-left:1px solid var(--base)}
+.dv-track i{position:absolute;top:2px;height:12px;border-radius:3px}
+.dv-val{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--ink-2)}
+.dv-val b{color:var(--ink);font-size:13px;margin-right:6px}
+.dv-axis{display:grid;grid-template-columns:minmax(120px,240px) minmax(140px,1fr) minmax(150px,220px);gap:10px;font-size:11.5px;color:var(--muted)}
+.dv-axis div:nth-child(2){display:flex;justify-content:space-between}
+@media (max-width:640px){.dv{gap:9px}.dv-row,.dv-axis{grid-template-columns:1fr 1fr;row-gap:2px}.dv-row .dv-lab{grid-column:1 / -1}.dv-axis div:first-child{display:none}}
 .hb-val{font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
 #s-fifths .hb-val{white-space:normal;max-width:190px}
 #v-victims .card h3{margin:0 0 8px;font-size:14px}
@@ -459,13 +471,30 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
   </section>
 
   <section id="v-victims" class="view" hidden>
-    <p class="caution-line" id="vi-intro"><b>This tab uses two sources.</b> The first section uses monthly Queensland Police Service counts of victims for Queensland and each local government area. The sections below use annual Australian Bureau of Statistics counts for Queensland as a whole, which add age detail, relationship to the offender, family and domestic violence and more. The two are counted differently and will not match each other or the offence figures on other tabs. <a href="#about">Read more in About the data</a></p>
+    <p class="caution-line" id="vi-intro"><b>This tab uses two sources.</b> The first two sections use monthly Queensland Police Service counts of victims for Queensland and each local government area. The sections below use annual Australian Bureau of Statistics counts for Queensland as a whole, which add age detail, relationship to the offender, family and domestic violence and more. The two are counted differently and will not match each other or the offence figures on other tabs. <a href="#about">Read more in About the data</a></p>
+
+    <div class="card" id="vi-lead">
+      <div class="card-head">
+        <div><h2 id="vil-h">How victimisation has changed, by crime type</h2><p class="sub" id="vil-s"></p></div>
+        <div class="filters">
+          <div class="field f-loc"><label for="viq-loc-in">Location</label><div class="combo" id="viq-loc"></div></div>
+          <div class="field"><span class="lab">Change over</span><div class="seg" role="radiogroup" aria-label="Change over">
+            <input type="radio" name="vil-w" id="vil-w1" value="1" checked><label for="vil-w1">12 months</label>
+            <input type="radio" name="vil-w" id="vil-w2" value="2"><label for="vil-w2">2 years</label>
+            <input type="radio" name="vil-w" id="vil-w5" value="5"><label for="vil-w5">5 years</label></div></div>
+          <label class="check"><input type="checkbox" id="vil-sub"> Show sub-types</label>
+        </div>
+      </div>
+      <div class="legend" id="vil-leg"></div>
+      <div id="vil-chart"></div>
+      <p class="sub" id="vil-note" style="margin-top:8px"></p>
+      <details class="tbl" id="vil-tbl"><summary>Show as table</summary><div class="tblbody"></div></details>
+    </div>
 
     <div class="card" id="vi-q">
       <div class="card-head">
         <div><h2 id="viq-h">Victims by crime type and place</h2><p class="sub" id="viq-s"></p></div>
         <div class="filters">
-          <div class="field f-loc"><label for="viq-loc-in">Location</label><div class="combo" id="viq-loc"></div></div>
           <div class="field"><span class="lab">Show</span><div class="seg" role="radiogroup" aria-label="Show">
             <input type="radio" name="viq-meas" id="viq-rate" value="rate" checked><label for="viq-rate">Rate per 100,000</label>
             <input type="radio" name="viq-meas" id="viq-num" value="n"><label for="viq-num">Number</label></div></div>
@@ -638,7 +667,7 @@ function getSummary() { if (!SUMMARY) SUMMARY = getJSON('summary.json'); return 
 function getGeo() { if (!GEO) GEO = getJSON('geo.json'); return GEO; }
 let SEIFA = null;
 function getSeifa() { if (!SEIFA) SEIFA = getJSON('seifa.json'); return SEIFA; }
-const SEIFA_BANDS = [900, 950, 1000, 1050], SEIFA_SHORT = ['IRSD', 'IRSAD', 'IER', 'IEO'];
+const SEIFA_SHORT = ['IRSD', 'IRSAD', 'IER', 'IEO'];
 /* counts: kind 'c' offences | 'a' adult offenders | 'j' juvenile offenders (+ m/f) | 'v' all victims | 'va', 'vj' adult / juvenile victims (+ m/f) */
 function counts(o, id, kind, loc) {
   const key = id + kind + loc.k + loc.i;
@@ -1031,6 +1060,17 @@ function mapSize() { const c = $('#m-canvas'); return {w: c.clientWidth, h: c.cl
 function fitBox(b, pad) { const {w, h} = mapSize(), bw = b[2] - b[0] || 1e-3, bh = b[3] - b[1] || 1e-3, k = Math.min(w / bw, h / bh) * (pad || 0.9); M.view = {k, tx: w / 2 - (b[0] + b[2]) / 2 * k, ty: h / 2 - (b[1] + b[3]) / 2 * k}; drawMap(); }
 function layerBox(feats) { const b = [Infinity, Infinity, -Infinity, -Infinity]; for (const f of feats) { if (!f.rings.length) continue; b[0] = Math.min(b[0], f.bbox[0]); b[1] = Math.min(b[1], f.bbox[1]); b[2] = Math.max(b[2], f.bbox[2]); b[3] = Math.max(b[3], f.bbox[3]); } return b; }
 function mapGeo() { return $('input[name="m-geo"]:checked').value; }
+/* map classes: number of rate classes (quantiles of areas), change-map cut points (%), SEIFA score bands */
+const MAPCFG = {rateN: 8, chg: [-40, -20, -10, -5, 5, 10, 20, 40], sei: [850, 900, 950, 1000, 1050, 1100]};
+/* colour ramps of any length, interpolated in OKLab between the stops defined in CSS */
+const hex2rgb = h => [1, 3, 5].map(i => parseInt(h.trim().slice(i, i + 2), 16) / 255);
+const lin = c => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4), unlin = c => c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+function toLab(h) { const [r, g, b] = hex2rgb(h).map(lin), l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b), m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b), s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b); return [0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s, 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s, 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s]; }
+function fromLab([L, A, B]) { const l = Math.pow(L + 0.3963377774 * A + 0.2158037573 * B, 3), m = Math.pow(L - 0.1055613458 * A - 0.0638541728 * B, 3), s = Math.pow(L - 0.0894841775 * A - 1.2914855480 * B, 3); const rgb = [4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s, -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s, -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s]; return '#' + rgb.map(c => Math.round(Math.max(0, Math.min(1, unlin(c))) * 255).toString(16).padStart(2, '0')).join(''); }
+function rampFrom(stops, n) { if (n === 1) return [stops[stops.length - 1]]; const L = stops.map(toLab); return Array.from({length: n}, (_, i) => { const t = i / (n - 1) * (L.length - 1), k = Math.min(L.length - 2, Math.floor(t)), f = t - k; return fromLab(L[k].map((v, j) => v + (L[k + 1][j] - v) * f)); }); }
+const rampSeq = n => rampFrom([1, 2, 3, 4, 5, 6].map(i => cssv('--seq-' + i)), n);
+const rampSei = n => rampFrom([1, 2, 3, 4, 5].map(i => cssv('--sei-' + i)), n);
+function rampDiv(side) { const d = [1, 2, 3, 4, 5, 6, 7].map(i => cssv('--div-' + i)); return [...rampFrom(d.slice(0, 4), side + 1).slice(0, side), d[3], ...rampFrom(d.slice(3), side + 1).slice(1)]; }
 function quantBreaks(vals, n) {
   const v = vals.filter(x => x != null && isFinite(x)).sort((a, b) => a - b); if (!v.length) return [];
   const out = [];
@@ -1058,8 +1098,8 @@ async function renderMap() {
     return o;
   });
   M.info = info; M.names = names; M.geo = geo; M.show = show; M.meas = meas;
-  if (show === 'rate') { M.breaks = quantBreaks(info.map(x => x.v), 6); M.colors = [1, 2, 3, 4, 5, 6].slice(0, M.breaks.length + 1).map(i => cssv('--seq-' + (M.breaks.length < 5 ? i + (5 - M.breaks.length) : i))); }
-  else { M.breaks = [-30, -15, -5, 5, 15, 30]; M.colors = [1, 2, 3, 4, 5, 6, 7].map(i => cssv('--div-' + i)); }
+  if (show === 'rate') { M.breaks = quantBreaks(info.map(x => x.v), MAPCFG.rateN); M.colors = rampSeq(MAPCFG.rateN).slice(MAPCFG.rateN - (M.breaks.length + 1)); }
+  else { M.breaks = MAPCFG.chg; M.colors = rampDiv(MAPCFG.chg.length / 2); }
   M.classOf = v => { let c = 0; while (c < M.breaks.length && v >= M.breaks[c]) c++; return c; };
   /* legend */
   const L = $('#m-legend'); L.textContent = '';
@@ -1086,12 +1126,12 @@ async function renderMapSeifa(S, k) {
   if (M.sel && M.sel.k !== geo) M.sel = null;
   M.info = feats.map((f, i) => { const v = G.score[i] ? G.score[i][k] : null; return v == null ? {v: null} : {v, seifa: true, q1: G.q1[i] && G.q1[i][k], dA: geo === 'l' ? G.dec_aus[i][k] : null, dQ: geo === 'l' ? G.dec_qld[i][k] : null, p: G.urp[i]}; });
   M.names = names; M.geo = geo; M.show = 'seifa'; M.meas = 'seifa-' + k; M.seiK = k;
-  M.breaks = SEIFA_BANDS; M.colors = [5, 4, 3, 2, 1].map(c => cssv('--sei-' + c));
+  M.breaks = MAPCFG.sei; M.colors = rampSei(MAPCFG.sei.length + 1).reverse();
   M.classOf = v => { let c = 0; while (c < M.breaks.length && v >= M.breaks[c]) c++; return c; };
   const L = $('#m-legend'); L.textContent = '';
   L.append(el('div', {class: 't', text: `${SE.indexes[k].name} (${SEIFA_SHORT[k]}), SEIFA 2021 score. Lower scores mean ${k === 0 ? 'more disadvantage' : 'more disadvantage, higher scores more advantage'}.${geo === 'd' ? ' Police divisions: population-weighted average of their SA1 scores.' : ''}`}));
   const sw = el('div', {class: 'sw'});
-  M.colors.forEach((col, i) => { const b = el('i'); b.style.background = col; const lo = i ? M.breaks[i - 1] : null, hi = i < M.breaks.length ? M.breaks[i] : null; sw.append(el('div', null, b, el('span', {text: lo == null ? '< ' + fInt(hi) : hi == null ? fInt(lo) + ' +' : fInt(lo) + '\u2013' + fInt(hi - 1)}))); });
+  M.colors.forEach((col, i) => { const b = el('i'); b.style.background = col; const lo = i ? M.breaks[i - 1] : null, hi = i < M.breaks.length ? M.breaks[i] : null; sw.append(el('div', null, b, el('span', {text: lo == null ? '< ' + fInt(hi) : hi == null ? fInt(lo) + ' +' : fInt(lo)}))); });
   L.append(sw);
   const order = M.info.map((x, i) => ({x, i})).filter(r => r.x.v != null).sort((a, b) => a.x.v - b.x.v);
   $('#m-rank-h').textContent = `Areas ranked by ${SEIFA_SHORT[k]} score`;
@@ -1605,6 +1645,41 @@ function getVictims() { if (!VICTIMS) VICTIMS = getJSON('victims.json'); return 
 const AGE_LABEL = b => b.replace('-', '–').replace('+', ' and over') + (/\+$/.test(b) ? '' : ' years');
 const radio = name => $(`input[name="${name}"]:checked`).value;
 let viqCombo = null, viqLoc = {k: 'q', i: 0};
+function renderVictimsLead(S, loc) {
+  if (!renderVictimsLead.wired) { renderVictimsLead.wired = true; $$('input[name="vil-w"], #vil-sub').forEach(i => i.addEventListener('change', () => renderVictimsLead(S, viqLoc))); }
+  const yrs = +$('input[name="vil-w"]:checked').value, sub = $('#vil-sub').checked, Lk = loc.k === 'q', MINN = 20;
+  const ok = yrs < S.win_end.length;
+  const list = META.offences.filter(o => o.vic && (o.id === 0 || o.lvl === 1 || (sub && o.lvl >= 2 && META.offences[o.parent] && META.offences[o.parent].vic)));
+  const Pn = Lk ? S.p_q[0] : S.p_l[loc.i][0], Pt = Lk ? S.p_q[yrs] : S.p_l[loc.i][yrs];
+  const rows = list.map(o => {
+    const v = Lk ? S.v_q[o.id] : S.v_l[o.id][loc.i], n1 = v[0], n0 = v[yrs], r1 = n1 / Pn * 1e5, r0 = n0 / Pt * 1e5;
+    const small = Math.max(n1, n0) < MINN, chg = !small && r0 > 0 ? (r1 / r0 - 1) * 100 : null;
+    return {o, n1, n0, r1, r0, chg, small, isNew: n0 === 0 && n1 > 0};
+  }).filter(r => r.n0 + r.n1 > 0);
+  const span = yrs === 1 ? 'a year' : yrs + ' years';
+  $('#vil-h').textContent = `How victimisation has changed, by crime type: ${locFull(loc)}`;
+  $('#vil-s').textContent = `Change in victims per 100,000 population, ${lowerFirst(winLabel(S.win_end[0]))} compared with the same 12 months ${span} earlier (${lowerFirst(winLabel(S.win_end[yrs]))}). Rates allow for population growth. QPS data; a person can be counted more than once.`;
+  const lim = Math.max(10, ...rows.filter(r => r.chg != null).map(r => Math.min(100, Math.abs(r.chg))));
+  const step = niceStep(lim, 3), top = Math.ceil(lim / step) * step;
+  const host = $('#vil-chart'); host.textContent = '';
+  host.append(el('div', {class: 'dv-axis'}, el('div'), el('div', null, el('span', {text: '\u2212' + fInt(top) + '%'}), el('span', {text: '0'}), el('span', {text: '+' + fInt(top) + '%'})), el('div')));
+  const wrap = el('div', {class: 'dv'});
+  for (const r of rows) {
+    const tr = el('div', {class: 'dv-track'});
+    if (r.chg != null) { const w = Math.min(Math.abs(r.chg), top) / top * 50; const b = el('i'); b.style.width = w + '%'; b.style[r.chg >= 0 ? 'left' : 'right'] = '50%'; b.style.background = r.chg >= 0 ? 'var(--div-6)' : 'var(--div-2)'; if (Math.abs(r.chg) > top) b.style.backgroundImage = 'linear-gradient(90deg, transparent 85%, rgba(255,255,255,.55) 85%)'; tr.append(b); }
+    const val = el('div', {class: 'dv-val'});
+    if (r.chg != null) val.append(el('b', {text: fPct(r.chg)}), document.createTextNode(`${fRate(r.r0)} \u2192 ${fRate(r.r1)}`));
+    else val.append(el('b', {text: r.isNew && !r.small ? 'new' : 'n/a'}), document.createTextNode(r.small ? `fewer than ${MINN} victims (${fInt(r.n0)} \u2192 ${fInt(r.n1)})` : r.isNew ? `none recorded ${span} earlier` : ''));
+    wrap.append(el('div', {class: 'dv-row' + (r.o.id === 0 ? ' top' : '') + (r.o.lvl >= 2 ? ' sub' : ''), title: `${r.o.name}: ${fInt(r.n0)} \u2192 ${fInt(r.n1)} victims`}, el('div', {class: 'dv-lab', text: r.o.name}), tr, val));
+  }
+  host.append(wrap);
+  swLegend($('#vil-leg'), [{name: 'Rate fell', color: 'var(--div-2)'}, {name: 'Rate rose', color: 'var(--div-6)'}]);
+  const big = rows.filter(r => r.chg != null && r.o.id !== 0).sort((a, b) => Math.abs(b.chg) - Math.abs(a.chg))[0];
+  $('#vil-note').textContent = `Changes based on fewer than ${MINN} victims in both periods are not shown. Bars are capped at \u00B1${fInt(top)}%; the figure beside each bar is the full change, then the rate per 100,000 before and after. For unlawful entry and unlawful use of a motor vehicle QPS counts the location as the victim.${S.win_end[yrs] < (2022 - META.start_year) * 12 + 6 ? ' The earlier period falls before or across 1 July 2021, when Queensland police began recording every criminal offence linked to a domestic and family violence incident (see About the data), so part of any rise in offences against the person may reflect recording practice.' : ''}`;
+  simpleTable($('#vil-tbl'), ['Crime type', `Victims, ${winLabel(S.win_end[yrs])}`, `Victims, ${winLabel(S.win_end[0])}`, 'Rate before', 'Rate after', 'Change in rate'],
+    rows.map(r => [r.o.name, fInt(r.n0), fInt(r.n1), fRate(r.r0), fRate(r.r1), r.chg == null ? 'n/a' : fPct(r.chg)]),
+    rows.map(r => ['"' + r.o.name + '"', r.n0, r.n1, r.r0.toFixed(2), r.r1.toFixed(2), r.chg == null ? '' : r.chg.toFixed(2)]));
+}
 async function renderVictimsQPS() {
   let S; try { S = await getSummary(); } catch (e) { return fatal(e); }
   if (!viqCombo) {
@@ -1615,7 +1690,9 @@ async function renderVictimsQPS() {
     $('#viq-go').addEventListener('click', e => { e.preventDefault(); setOff(+$('#viq-o').value); state.loc = viqLoc; locCombo.set(locName(viqLoc)); location.hash = 'trends'; });
   }
   const loc = viqLoc, rate = radio('viq-meas') === 'rate', e0 = S.win_end[0], name = locName(loc), Lk = loc.k === 'q';
-  $('#viq-s').textContent = `Victims recorded by Queensland police, ${lowerFirst(winLabel(e0))}, ${locFull(loc)}. Monthly data from January 2001; a person can be counted more than once.`;
+  renderVictimsLead(S, loc);
+  $('#viq-h').textContent = `Victims by crime type, age and sex: ${locFull(loc)}`;
+  $('#viq-s').textContent = `Victims recorded by Queensland police, ${lowerFirst(winLabel(e0))}. The location is set at the top of this tab.`;
   /* by crime type: level 0-1 offences with victim data */
   const list = META.offences.filter(o => o.vic && (o.lvl === 1 || o.id === 0));
   const P0 = Lk ? S.p_q[0] : S.p_l[loc.i][0], P1 = Lk ? S.p_q[1] : S.p_l[loc.i][1];
