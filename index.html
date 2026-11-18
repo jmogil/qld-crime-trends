@@ -458,10 +458,15 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
     <p class="caution-line"><b>Interpret rates for individual places with caution.</b> Many of the highest rates are in small, remote communities, where a few offences produce a very high rate. These charts show how rates and disadvantage go together across areas; they do not show that disadvantage causes crime, or that individual residents of disadvantaged areas offend. <a href="#about">Read the note in About the data</a></p>
     <div class="card">
       <div class="card-head"><div><h2 id="s-h"></h2><p class="sub" id="s-s"></p></div>
-        <div class="seg" role="radiogroup" aria-label="Rate axis"><input type="radio" name="s-scale" id="s-scale-log" value="log" checked><label for="s-scale-log">Log</label><input type="radio" name="s-scale" id="s-scale-lin" value="lin"><label for="s-scale-lin">Linear</label></div></div>
+        <div class="filters" style="gap:10px 16px">
+          <div class="field"><span class="lab">Rate axis</span><div class="seg" role="radiogroup" aria-label="Rate axis"><input type="radio" name="s-scale" id="s-scale-log" value="log" checked><label for="s-scale-log">Log</label><input type="radio" name="s-scale" id="s-scale-lin" value="lin"><label for="s-scale-lin">Linear</label></div></div>
+          <div class="field"><span class="lab">Trend line</span><div class="seg" role="radiogroup" aria-label="Trend line weighting"><input type="radio" name="s-wt" id="s-wt-u" value="u" checked><label for="s-wt-u">Unweighted</label><input type="radio" name="s-wt" id="s-wt-p" value="p"><label for="s-wt-p">Population-weighted</label></div></div>
+        </div></div>
       <div class="legend" id="s-leg"></div>
       <div class="chart" id="s-chart"></div>
-      <p class="sub" id="s-stat" style="margin-top:6px"></p>
+      <p class="sub" id="s-trend" style="margin-top:6px"></p>
+      <p class="sub" id="s-stat" style="margin-top:4px"></p>
+      <ul class="sub notes" id="s-notes" style="margin:6px 0 0;padding-left:18px"></ul>
     </div>
     <div class="cols">
       <div class="card"><h2 id="s-h2">Rate by fifth of the population</h2><p class="sub" id="s-s2"></p><div id="s-fifths"></div></div>
@@ -1502,7 +1507,7 @@ function renderAbout() {
       li(B('Police divisions. '), 'ABS does not publish SEIFA for police divisions. Each Queensland SA1 (the smallest area with a SEIFA score) is placed in the division that contains a point inside it, and the division score is the average of its SA1 scores, weighted by usual resident population. Nine small divisions contain no SA1 point and take the score of the SA1 at their centre. Applied to LGAs, the same method reproduces the scores ABS publishes almost exactly (correlation 1.00, average difference under one point), which supports using it for divisions. An average score can hide wide variation within an area.'),
       li(B('Lowest national fifth. '), 'For each area the site also shows the share of residents living in SA1s in deciles 1 and 2 nationally.'),
       li(B('Correlation, not cause. '), 'The Disadvantage tab describes how rates and disadvantage vary together across areas. Area-level patterns do not show that disadvantage causes crime, and they say nothing about individual residents. Small areas with very high rates can dominate the scatter plot, which is why the tab also shows combined rates for fifths of the population.'),
-      li(B('Statistics. '), 'Spearman rank correlations treat each area equally. The 95% confidence interval uses the standard error proposed by ', link('Bonett and Wright (2000)', 'https://doi.org/10.1007/BF02294183'), '. Fifths are formed by ranking areas by score and grouping them into five groups of about equal population; the rate for each group is its total count divided by its total population.')),
+      li(B('Statistics. '), 'Spearman rank correlations treat each area equally. The 95% confidence interval uses the standard error proposed by ', link('Bonett and Wright (2000)', 'https://doi.org/10.1007/BF02294183'), '. Fifths are formed by ranking areas by score and grouping them into five groups of about equal population; the rate for each group is its total count divided by its total population. The trend line is a least-squares line of the rate, or of its logarithm when the log axis is chosen, on the SEIFA score; it can be unweighted or weighted by population, and areas with a rate of zero are left out. Its 95% confidence interval uses the t distribution and assumes areas are independent, which they are not quite, so it is too narrow.')),
     H('Where the data come from'),
     el('ul', null,
       li(link('Queensland Police Service, Maps and statistics', 'https://www.police.qld.gov.au/maps-and-statistics'), ': reported offences for Queensland, local government areas and police divisions; reported offenders by age group and sex for Queensland and local government areas; police division boundaries.'),
@@ -1842,6 +1847,20 @@ function spearman(x, y) {
   const r = sxy / Math.sqrt(sxx * syy), z = Math.atanh(Math.max(-0.9999, Math.min(0.9999, r))), se = Math.sqrt((1 + r * r / 2) / (n - 3)); /* Bonett & Wright (2000) */
   return {r, lo: Math.tanh(z - 1.96 * se), hi: Math.tanh(z + 1.96 * se), n};
 }
+function tq975(df) { /* 97.5th percentile of Student's t (Cornish-Fisher expansion; error < 0.001 for df >= 3) */
+  const z = 1.959963985, z3 = z ** 3, z5 = z ** 5, z7 = z ** 7;
+  return z + (z3 + z) / (4 * df) + (5 * z5 + 16 * z3 + 3 * z) / (96 * df * df) + (3 * z7 + 19 * z5 + 17 * z3 - 15 * z) / (384 * df ** 3);
+}
+function wls(x, y, w) {
+  /* weighted least squares y = a + b x; precision-style weights, residual variance estimated from the fit */
+  const n = x.length; if (n < 4) return null;
+  const W = w.reduce((t, v) => t + v, 0), mx = x.reduce((t, v, i) => t + w[i] * v, 0) / W, my = y.reduce((t, v, i) => t + w[i] * v, 0) / W;
+  let sxx = 0, sxy = 0, syy = 0; for (let i = 0; i < n; i++) { const dx = x[i] - mx, dy = y[i] - my; sxx += w[i] * dx * dx; sxy += w[i] * dx * dy; syy += w[i] * dy * dy; }
+  if (!(sxx > 0)) return null;
+  const b = sxy / sxx, a = my - b * mx; let sse = 0; for (let i = 0; i < n; i++) { const e = y[i] - a - b * x[i]; sse += w[i] * e * e; }
+  const se = Math.sqrt(sse / (n - 2) / sxx), t = tq975(n - 2);
+  return {a, b, lo: b - t * se, hi: b + t * se, r2: syy > 0 ? 1 - sse / syy : null, n};
+}
 function fifths(pts) {
   /* areas ordered by score (lowest = most disadvantaged), cut into five groups of roughly equal population; pooled rate per group */
   const o = pts.slice().sort((a, b) => a.s - b.s), tot = o.reduce((t, d) => t + d.p, 0); let cum = 0;
@@ -1860,7 +1879,7 @@ async function renderSeifa() {
   $('#s-h').textContent = `${o.name}: ${measName(meas)} against ${ix} score, by ${area}`;
   $('#s-s').textContent = `${winLabel(S.win_end[w])}. Each dot is one ${area}, sized by population; hollow dots have fewer than 5,000 ${meas === 'off' || meas === 'vic' ? 'residents' : measDenom(meas)}. Lower ${ix} scores mean more disadvantage.${geo === 'd' ? ' Division scores are population-weighted averages of SA1 scores.' : ''}`;
   const host = $('#s-chart'); host.textContent = '';
-  ['#s-stat', '#s-fifths', '#s-corr'].forEach(q => { $(q).textContent = ''; });
+  ['#s-stat', '#s-fifths', '#s-corr', '#s-trend', '#s-notes'].forEach(q => { $(q).textContent = ''; });
   if (pts.length < 5) { host.append(el('p', {class: 'sub', text: isVicMeas(meas) && !o.vic ? 'QPS publishes victim counts only for offences against the person, unlawful entry and unlawful use of a motor vehicle. Choose one of those crime types.' : 'Not enough areas with data for this selection.'})); return; }
   /* scatter */
   const W = Math.max(320, host.clientWidth || 800), H = Math.min(460, Math.max(300, W * 0.5)), m = {l: 58, r: 16, t: 12, b: 40}, pw = W - m.l - m.r, ph = H - m.t - m.b;
@@ -1887,8 +1906,30 @@ async function renderSeifa() {
     c.addEventListener('click', go); c.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
     svg.append(c);
   });
+  /* linear trend: follows the axis (rate or log10 rate), excludes zero rates, optional population weights */
+  const wtP = $('input[name="s-wt"]:checked').value === 'p', fitPts = pts.filter(d => d.rate > 0), nZero = pts.length - fitPts.length;
+  const fit = wls(fitPts.map(d => d.s), fitPts.map(d => logY ? Math.log10(d.rate) : d.rate), fitPts.map(d => wtP ? d.p : 1));
+  if (fit) {
+    const clip = sv('clipPath', {id: 's-clip'}, sv('rect', {x: m.l, y: m.t, width: pw, height: ph})); svg.append(sv('defs', null, clip));
+    const fx0 = Math.min(...fitPts.map(d => d.s)), fx1 = Math.max(...fitPts.map(d => d.s)), N = 40, path = [];
+    for (let j = 0; j <= N; j++) { const xv = fx0 + (fx1 - fx0) * j / N, yv = fit.a + fit.b * xv, rv = logY ? Math.pow(10, yv) : yv; path.push((j ? 'L' : 'M') + X(xv).toFixed(1) + ' ' + Y(Math.max(rv, logY ? 1e-9 : -1e9)).toFixed(1)); }
+    svg.insertBefore(sv('path', {d: path.join(''), fill: 'none', stroke: 'var(--ink)', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'clip-path': 'url(#s-clip)', opacity: .85}), svg.querySelector('circle'));
+  }
   host.append(svg, tip);
-  $('#s-leg').textContent = ''; $('#s-leg').append(el('span', null, (() => { const i = el('i', {class: 'sw'}); i.style.background = 'var(--accent)'; i.style.borderRadius = '50%'; return i; })(), document.createTextNode('5,000 or more')), el('span', null, (() => { const i = el('i', {class: 'sw'}); i.style.border = '1.5px solid var(--accent)'; i.style.borderRadius = '50%'; i.style.background = 'transparent'; return i; })(), document.createTextNode('Fewer than 5,000')), el('span', null, (() => { const i = el('i'); i.style.color = 'var(--ref)'; i.style.borderTopStyle = 'dashed'; return i; })(), document.createTextNode('Queensland rate')));
+  const tr = $('#s-trend'); tr.textContent = '';
+  if (fit) {
+    const per = 100, wtTxt = wtP ? 'population-weighted' : 'unweighted';
+    if (logY) { const pc = v => (Math.pow(10, -per * v) - 1) * 100; tr.append(el('b', {text: `Linear trend (${wtTxt}, log scale): `}), document.createTextNode(`the rate is ${fPct(pc(fit.b))} for every ${per} points lower ${ix} score (95% CI ${fPct(pc(fit.hi))} to ${fPct(pc(fit.lo))}); R\u00B2 = ${fit.r2.toFixed(2)}; ${fit.n} areas.`)); }
+    else { const d = v => -per * v; tr.append(el('b', {text: `Linear trend (${wtTxt}, linear scale): `}), document.createTextNode(`${d(fit.b) >= 0 ? '+' : '\u2212'}${fRate(Math.abs(d(fit.b)))} per 100,000 for every ${per} points lower ${ix} score (95% CI ${fRate(d(fit.hi))} to ${fRate(d(fit.lo))}); R\u00B2 = ${fit.r2.toFixed(2)}; ${fit.n} areas.`)); }
+  } else tr.append(document.createTextNode('Not enough areas with a rate above zero to fit a trend line.'));
+  const nt = $('#s-notes'); nt.textContent = '';
+  [`The trend line is fitted to ${logY ? 'the logarithm of the rate, so it describes a constant percentage difference and appears straight on the log axis' : 'the rate itself, so it describes a constant difference per 100,000 and appears straight on the linear axis'}. Switch the rate axis to change the model.`,
+   nZero ? `${nZero} area${nZero === 1 ? '' : 's'} with a rate of zero ${nZero === 1 ? 'is' : 'are'} shown on the chart but excluded from the trend line.` : 'No areas have a rate of zero, so all are included in the trend line.',
+   wtP ? 'Population-weighted: each area counts in proportion to its population (the rate denominator), so large areas dominate and small remote areas count for little.' : 'Unweighted: each area counts equally, whatever its population, so a few small areas with extreme rates can pull the line.',
+   'R\u00B2 is the share of the variation between areas (on the axis shown) accounted for by the line. The 95% confidence interval treats areas as independent; neighbouring areas tend to be similar, so the true uncertainty is wider than shown.',
+   'An area-level trend describes how rates and disadvantage vary together across places. It does not show cause, and it says nothing about individual residents.'
+  ].forEach(t => nt.append(el('li', {text: t})));
+  $('#s-leg').textContent = ''; $('#s-leg').append(el('span', null, (() => { const i = el('i', {class: 'sw'}); i.style.background = 'var(--accent)'; i.style.borderRadius = '50%'; return i; })(), document.createTextNode('5,000 or more')), el('span', null, (() => { const i = el('i', {class: 'sw'}); i.style.border = '1.5px solid var(--accent)'; i.style.borderRadius = '50%'; i.style.background = 'transparent'; return i; })(), document.createTextNode('Fewer than 5,000')), el('span', null, (() => { const i = el('i'); i.style.color = 'var(--ref)'; i.style.borderTopStyle = 'dashed'; return i; })(), document.createTextNode('Queensland rate')), el('span', null, (() => { const i = el('i'); i.style.color = 'var(--ink)'; i.style.borderTopWidth = '2.5px'; return i; })(), document.createTextNode('Linear trend')));
   const sp = spearman(pts.map(d => d.s), pts.map(d => d.rate));
   const dirTxt = r => Math.abs(r) < 0.1 ? 'little or no association' : (r < 0 ? 'higher rates in more disadvantaged areas' : 'higher rates in less disadvantaged areas');
   $('#s-stat').append(el('b', {text: `Spearman rank correlation ${sp.r.toFixed(2)} (95% CI ${sp.lo.toFixed(2)} to ${sp.hi.toFixed(2)}), ${sp.n} areas: `}), document.createTextNode(dirTxt(sp.r) + '. Each area counts equally, whatever its population.'));
