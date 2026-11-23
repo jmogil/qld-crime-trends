@@ -241,6 +241,7 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
       <a href="#mix" data-view="mix">Offence mix</a>
       <a href="#seifa" data-view="seifa">Disadvantage</a>
       <a href="#victims" data-view="victims">Victims</a>
+      <a href="#custody" data-view="custody">Custody</a>
       <a href="#about" data-view="about">About the data</a>
       <button type="button" id="reset" class="reset" title="Back to Queensland, offences against the person, offence rate">Reset</button>
     </nav>
@@ -624,6 +625,49 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
     </div>
   </section>
 
+  <section id="v-custody" class="view" hidden>
+    <p class="caution-line"><b>Two sources, counted differently.</b> Adult figures are prisoners held on 30 June each year (ABS, Prisoners in Australia). Youth figures are the average number of young people in detention on a night in each quarter (AIHW, Youth detention population in Australia). Neither is comparable with the offence figures on other tabs. <a href="#about">Read more in About the data</a></p>
+
+    <div class="card" id="cu-a">
+      <div class="card-head">
+        <div><h2 id="cua-h">Adults in prison, Queensland</h2><p class="sub" id="cua-s"></p></div>
+        <div class="filters">
+          <div class="field"><span class="lab">Show</span><div class="seg" role="radiogroup"><input type="radio" name="cua-m" id="cua-m-n" value="n" checked><label for="cua-m-n">Number</label><input type="radio" name="cua-m" id="cua-m-rate" value="rate"><label for="cua-m-rate">Rate per 100,000 adults</label></div></div>
+          <div class="field"><span class="lab">Split by</span><div class="seg" role="radiogroup"><input type="radio" name="cua-by" id="cua-by-total" value="total" checked><label for="cua-by-total">Total</label><input type="radio" name="cua-by" id="cua-by-sex" value="sex"><label for="cua-by-sex">Sex</label><input type="radio" name="cua-by" id="cua-by-ind" value="ind"><label for="cua-by-ind">Indigenous status</label></div></div>
+        </div>
+      </div>
+      <div class="tiles" id="cua-tiles" style="margin-bottom:12px"></div>
+      <div class="legend" id="cua-leg"></div>
+      <div class="chart" id="cua-chart"></div>
+      <ul class="sub notes" id="cua-notes" style="margin:6px 0 0;padding-left:18px"></ul>
+      <details class="tbl" id="cua-tbl"><summary>Show as table</summary><div class="tblbody"></div></details>
+    </div>
+    <div class="cols">
+      <div class="card"><h2>Adults: unsentenced (on remand)</h2><p class="sub">Share of prisoners on 30 June who were unsentenced, 2000 to 2025.</p><div class="chart" id="cua-uns"></div></div>
+      <div class="card"><h2>Adults: Indigenous rate ratio</h2><p class="sub">Aboriginal and Torres Strait Islander imprisonment rate divided by the non-Indigenous rate. Dotted lines mark changes in the population estimates ABS used.</p><div class="chart" id="cua-ratio"></div></div>
+    </div>
+
+    <div class="card" id="cu-y">
+      <div class="card-head">
+        <div><h2 id="cuy-h">Young people in detention, Queensland</h2><p class="sub" id="cuy-s"></p></div>
+        <div class="filters">
+          <div class="field"><span class="lab">Ages</span><div class="seg" role="radiogroup"><input type="radio" name="cuy-age" id="cuy-age-10-17" value="10-17" checked><label for="cuy-age-10-17">10 to 17</label><input type="radio" name="cuy-age" id="cuy-age-all" value="all"><label for="cuy-age-all">All ages (incl. 18+)</label></div></div>
+          <div class="field"><span class="lab">Show</span><div class="seg" role="radiogroup"><input type="radio" name="cuy-m" id="cuy-m-n" value="n" checked><label for="cuy-m-n">Number</label><input type="radio" name="cuy-m" id="cuy-m-rate" value="rate"><label for="cuy-m-rate">Rate per 10,000 aged 10–17</label></div></div>
+          <div class="field"><span class="lab">Split by</span><div class="seg" role="radiogroup"><input type="radio" name="cuy-by" id="cuy-by-total" value="total" checked><label for="cuy-by-total">Total</label><input type="radio" name="cuy-by" id="cuy-by-sex" value="sex"><label for="cuy-by-sex">Sex</label><input type="radio" name="cuy-by" id="cuy-by-ind" value="ind"><label for="cuy-by-ind">Indigenous status</label><input type="radio" name="cuy-by" id="cuy-by-age" value="age"><label for="cuy-by-age">Age group</label></div></div>
+        </div>
+      </div>
+      <div class="tiles" id="cuy-tiles" style="margin-bottom:12px"></div>
+      <div class="legend" id="cuy-leg"></div>
+      <div class="chart" id="cuy-chart"></div>
+      <ul class="sub notes" id="cuy-notes" style="margin:6px 0 0;padding-left:18px"></ul>
+      <details class="tbl" id="cuy-tbl"><summary>Show as table</summary><div class="tblbody"></div></details>
+    </div>
+    <div class="cols">
+      <div class="card"><h2>Young people: unsentenced (on remand)</h2><p class="sub" id="cuy-uns-s"></p><div class="legend" id="cuy-uns-leg"></div><div class="chart" id="cuy-uns"></div></div>
+      <div class="card"><h2>Young people: Indigenous rate ratio</h2><p class="sub">First Nations rate of detention divided by the non-Indigenous rate, aged 10–17, each quarter.</p><div class="chart" id="cuy-ratio"></div></div>
+    </div>
+  </section>
+
   <section id="v-about" class="view" hidden>
     <div class="card about" id="about-body"></div>
   </section>
@@ -775,7 +819,7 @@ function lineChart(host, cfg) {
   const step = niceStep(ymax * 1.04, 4.5), ytop = Math.ceil(ymax * 1.04 / step) * step;
   const x = t => m.l + (t1 === t0 ? 0 : (t - t0) / (t1 - t0) * pw), y = v => m.t + ph - v / ytop * ph;
   const svg = sv('svg', {viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', tabindex: 0, 'aria-label': cfg.aria});
-  const dec = step < 1 ? (step < 0.1 ? 2 : 1) : 0;
+  const dec = [0, 1, 2, 3].find(d => Math.abs(step * 10 ** d - Math.round(step * 10 ** d)) < 1e-6) ?? 2;
   for (let v = 0; v <= ytop + 1e-9; v += step) {
     svg.append(sv('line', {x1: m.l, x2: m.l + pw, y1: y(v), y2: y(v), stroke: v === 0 ? 'var(--base)' : 'var(--hair)', 'stroke-width': 1}));
     svg.append(sv('text', {x: m.l - 8, y: y(v) + 4, 'text-anchor': 'end', text: v.toLocaleString('en-AU', {minimumFractionDigits: dec, maximumFractionDigits: dec})}));
@@ -1468,6 +1512,7 @@ function renderAbout() {
       li(B('Victim rates: '), 'for offences against the person, unlawful entry and unlawful use of a motor vehicle, the Trends, Biggest changes, Map and Funnel plot tabs also show victim rates for Queensland and each local government area, from monthly QPS data.'),
       li(B('Map layers for disadvantage: '), 'colour the map by any of the four ABS SEIFA 2021 indexes, for local government areas or police divisions.'),
       li(B('Disadvantage: '), 'see how offence, offender and victim rates line up with area disadvantage, using a scatter plot, rates for fifths of the population, and rank correlations for all four SEIFA indexes.'),
+      li(B('Custody: '), 'see how many adults are in prison and young people are in youth detention in Queensland, by sex and Indigenous status, including the share on remand.'),
       li(B('Victims: '), 'see victims by crime type, age and sex for any local government area from QPS, and longer-term annual detail for Queensland from ABS, including relationship to the offender and family and domestic violence.')),
     H('Understanding the numbers'),
     el('ul', null,
@@ -1479,6 +1524,13 @@ function renderAbout() {
       li(B('Residents, not visitors. '), 'Rates are based on the number of people who live in an area. Places with many visitors or workers compared with residents can show high rates for that reason.'),
       li(B('Seasons. '), 'Recorded crime rises and falls through the year. The rolling 12-month view removes that pattern and is the better guide to the underlying trend. QPS advises care when comparing one month with the next.'),
       li(B('No adjustment for who lives there. '), 'Rates are not adjusted for the age profile or other characteristics of an area.')),
+    H('Custody figures (ABS and AIHW)'),
+    P('The Custody tab uses two national collections. They count people held in custody, not offences or offenders, so the figures are not comparable with the rest of the site.'),
+    el('ul', null,
+      li(B('Adults. '), link('ABS, Prisoners in Australia', 'https://www.abs.gov.au/statistics/people/crime-and-justice/prisoners-australia/latest-release'), ' counts people held in adult prisons at 30 June each year, including people on remand. The series from 2000 is assembled from the 2010 and 2015 releases and the 2025 release (prisoners at 30 June 2016 to 2025), using the latest release for each year. Each release revised its rates to newer population estimates, so rates change basis in 2005 and 2016; Aboriginal and Torres Strait Islander rates are most affected. ABS notes that figures before 2017 include periodic detention.'),
+      li(B('Adult estimates. '), 'Before 2016 the releases give the total and the share of women or rates by sex, and the Aboriginal and Torres Strait Islander share, rather than counts. Numbers by sex and Indigenous status for 2000 to 2015 are calculated from those, and are shown dashed. For 2005 to 2015, numbers by sex use ABS rates by sex and ABS adult population, scaled to the published total; checked against 2016 to 2025, where ABS publishes both, the method is within 0.1% of the published counts.'),
+      li(B('Young people. '), link('AIHW, Youth detention population in Australia 2025', 'https://www.aihw.gov.au/reports/youth-justice/youth-detention-population-in-australia-2025/contents/trends-in-sentenced-and-unsentenced-detention'), ' gives the average number of young people in detention on a night in each quarter, from the June quarter 2021, including those unsentenced (on remand). Rates are per 10,000 aged 10–17. Youth detention also holds some people aged 18 and over. Rates by sex are calculated on this site from AIHW counts and ABS population.'),
+      li(B('Rate ratio. '), 'The Aboriginal and Torres Strait Islander (First Nations) rate divided by the non-Indigenous rate, as published by ABS for adults and AIHW for young people. Adult rates are crude rates, not age-standardised.')),
     H('Victim figures from QPS (monthly)'),
     P('QPS publishes monthly counts of reported victims from January 2001 for Queensland and each local government area (', link('QPS, Maps and statistics', 'https://www.police.qld.gov.au/maps-and-statistics'), '). This site uses them for the victim rates on the Trends, Biggest changes, Map and Funnel plot tabs and for the first section of the Victims tab. They are updated with the rest of the site each month.'),
     el('ul', null,
@@ -1513,6 +1565,8 @@ function renderAbout() {
       li(link('Queensland Police Service, Maps and statistics', 'https://www.police.qld.gov.au/maps-and-statistics'), ': reported offences for Queensland, local government areas and police divisions; reported offenders by age group and sex for Queensland and local government areas; police division boundaries.'),
       li(link('ABS, National, state and territory population', 'https://www.abs.gov.au/statistics/people/population/national-state-and-territory-population/latest-release'), `: Queensland population by single year of age and sex, at 30 June each year to ${META.abs_last_june}.`),
       li(link('ABS, Regional population by age and sex', 'https://www.abs.gov.au/statistics/people/population/regional-population-age-and-sex/latest-release'), `: population of each local government area by age group and sex, 30 June ${META.start_year} to ${META.abs_lga_last_june}.`),
+      li(link('ABS, Prisoners in Australia', 'https://www.abs.gov.au/statistics/people/crime-and-justice/prisoners-australia/latest-release'), ' (2010, 2015 and 2025 releases): adult prisoners in Queensland at 30 June.'),
+      li(link('AIHW, Youth detention population in Australia 2025', 'https://www.aihw.gov.au/reports/youth-justice/youth-detention-population-in-australia-2025/contents/trends-in-sentenced-and-unsentenced-detention'), ': young people in detention in Queensland, by quarter.'),
       li(link('ABS, SEIFA 2021', 'https://www.abs.gov.au/statistics/people/people-and-communities/socio-economic-indexes-areas-seifa-australia/latest-release'), ': Local Government Area and Statistical Area Level 1 indexes, with ', link('ABS SA1 2021 boundaries', 'https://www.abs.gov.au/statistics/standards/australian-statistical-geography-standard-asgs/edition-3-july-2021-june-2026/access-and-downloads/digital-boundary-files'), ' to place SA1s in police divisions.'),
       li(link('QPS, reported victims', 'https://www.police.qld.gov.au/maps-and-statistics'), ': monthly victims of offences against the person by age group and sex, and of unlawful entry and unlawful use of a motor vehicle, for Queensland and local government areas.'),
       li(link('ABS, Recorded Crime – Victims', 'https://www.abs.gov.au/statistics/people/crime-and-justice/recorded-crime-victims/latest-release'), ': victims of selected offences in Queensland by offence, age, sex, relationship of offender to victim, family and domestic violence status, location, weapon use and investigation outcome (Victims tab only). Age figures before the latest year come from the release for each year from 2010.'),
@@ -1546,10 +1600,11 @@ function annualChart(host, cfg) {
   const step = niceStep(ymax * 1.04, 4.5), ytop = Math.ceil(ymax * 1.04 / step) * step, suf = cfg.suffix || '';
   const x = i => m.l + (i1 === i0 ? pw / 2 : (i - i0) / (i1 - i0) * pw), y = v => m.t + ph - v / ytop * ph;
   const svg = sv('svg', {viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', tabindex: 0, 'aria-label': cfg.aria});
-  const dec = step < 1 ? (step < 0.1 ? 2 : 1) : 0;
+  const dec = [0, 1, 2, 3].find(d => Math.abs(step * 10 ** d - Math.round(step * 10 ** d)) < 1e-6) ?? 2;
   for (let v = 0; v <= ytop + 1e-9; v += step) { svg.append(sv('line', {x1: m.l, x2: m.l + pw, y1: y(v), y2: y(v), stroke: v === 0 ? 'var(--base)' : 'var(--hair)'})); svg.append(sv('text', {x: m.l - 8, y: y(v) + 4, 'text-anchor': 'end', text: v.toLocaleString('en-AU', {minimumFractionDigits: dec, maximumFractionDigits: dec}) + suf})); }
   const n = i1 - i0, maxTicks = Math.max(2, Math.floor(pw / 52)), ystep = [1, 2, 5, 10].find(s => n / s <= maxTicks) || 10;
-  for (let i = i0; i <= i1; i++) if (yrs[i] % ystep === 0 || n <= maxTicks) { svg.append(sv('line', {x1: x(i), x2: x(i), y1: m.t + ph, y2: m.t + ph + 4, stroke: 'var(--base)'})); svg.append(sv('text', {x: x(i), y: H - 8, 'text-anchor': 'middle', text: yrs[i]})); }
+  const tickEvery = cfg.labels ? Math.max(cfg.tickEvery || 4, Math.ceil((n + 1) / maxTicks / 4) * 4) : 0;
+  for (let i = i0; i <= i1; i++) if (cfg.labels ? (i1 - i) % tickEvery === 0 : (yrs[i] % ystep === 0 || n <= maxTicks)) { svg.append(sv('line', {x1: x(i), x2: x(i), y1: m.t + ph, y2: m.t + ph + 4, stroke: 'var(--base)'})); svg.append(sv('text', {x: x(i), y: H - 8, 'text-anchor': 'middle', text: cfg.tickLabels ? cfg.tickLabels[i] : yrs[i]})); }
   for (const my of [...new Set(cfg.marks || [])]) { const i = yrs.indexOf(my); if (i > i0 && i <= i1) svg.append(sv('line', {x1: x(i), x2: x(i), y1: m.t, y2: m.t + ph, stroke: 'var(--muted)', 'stroke-width': 1, 'stroke-dasharray': '2 3'})); }
   const ends = [];
   cfg.series.forEach(s => {
@@ -1559,6 +1614,7 @@ function annualChart(host, cfg) {
     if (cfg.series.length === 1) { let a = ''; let seg = []; const flush = () => { if (seg.length > 1) a += 'M' + seg.map(i => x(i).toFixed(1) + ' ' + y(s.vals[i]).toFixed(1)).join('L') + `L${x(seg[seg.length - 1]).toFixed(1)} ${y(0)}L${x(seg[0]).toFixed(1)} ${y(0)}Z`; seg = []; }; for (let i = i0; i <= i1; i++) { if (s.vals[i] == null) flush(); else seg.push(i); } flush(); if (a) svg.append(sv('path', {d: a, fill: s.color, opacity: .1})); }
     svg.append(sv('path', {d, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': s.dash ? 'butt' : 'round', 'stroke-dasharray': s.dash ? '6 4' : null}));
     for (let i = i0; i <= i1; i++) if (s.vals[i] != null && (s.vals[i - 1] == null && s.vals[i + 1] == null)) svg.append(sv('circle', {cx: x(i), cy: y(s.vals[i]), r: 3, fill: s.color}));
+    if (s.join) return;
     ends.push({s, i: last, yy: y(s.vals[last]), v: s.vals[last]});
   });
   ends.sort((a, b) => a.yy - b.yy); let prevY = -99;
@@ -1569,9 +1625,9 @@ function annualChart(host, cfg) {
   const tip = el('div', {class: 'tip', hidden: ''}); let cur = i1;
   const show = i => {
     cur = Math.max(i0, Math.min(i1, i)); cross.setAttribute('x1', x(cur)); cross.setAttribute('x2', x(cur)); cross.setAttribute('visibility', 'visible');
-    tip.textContent = ''; tip.append(el('div', {class: 'h', text: String(yrs[cur])}));
+    tip.textContent = ''; tip.append(el('div', {class: 'h', text: cfg.labels ? cfg.labels[cur] : String(yrs[cur])}));
     cfg.series.map((s, k) => ({s, k, v: s.vals[cur]})).sort((a, b) => (b.v == null ? -1 : b.v) - (a.v == null ? -1 : a.v)).forEach(({s, k, v}) => {
-      if (v == null) { dots[k].setAttribute('visibility', 'hidden'); return; }
+      if (v == null || (s.join && cfg.series.some(o => o !== s && o.color === s.color && o.vals[cur] != null))) { dots[k].setAttribute('visibility', 'hidden'); return; }
       dots[k].setAttribute('cx', x(cur)); dots[k].setAttribute('cy', y(v)); dots[k].setAttribute('visibility', 'visible');
       const key = el('i'); key.style.borderTopColor = s.color; if (s.dash) key.style.borderTopStyle = 'dashed';
       tip.append(el('div', {class: 'r'}, key, el('b', {text: fRate(v) + suf}), el('span', {text: s.name})));
@@ -1947,8 +2003,90 @@ async function renderSeifa() {
     pts.slice().sort((a, b) => a.s - b.s).map(d => [d.name, fInt(d.s), fRate(d.rate), fInt(d.c), fInt(d.p)]), pts.slice().sort((a, b) => a.s - b.s).map(d => ['"' + d.name + '"', d.s, d.rate.toFixed(2), d.c, d.p]));
 }
 
+/* ---------- CUSTODY (ABS prisoners; AIHW youth detention) ---------- */
+let CUSTODY = null;
+function getCustody() { if (!CUSTODY) CUSTODY = getJSON('custody.json'); return CUSTODY; }
+async function renderCustody() {
+  let C; try { C = await getCustody(); } catch (e) { return fatal(e); }
+  const A = C.adults, Yq = C.youth, chg = (a, b) => (a != null && b > 0) ? (a / b - 1) * 100 : null;
+  const tileEl = (k, v, unit, d, lab, n) => { const t = el('div', {class: 'tile'}, el('div', {class: 'k', text: k})); const vv = el('div', {class: 'v', text: v}); if (unit) vv.append(' ', el('small', {text: unit})); t.append(vv); if (d != null) t.append(el('div', {class: 'd'}, el('span', {class: d > 0 ? 'arrow-up' : d < 0 ? 'arrow-down' : '', text: d > 0 ? '▲ ' : d < 0 ? '▼ ' : ''}), el('b', {text: fPct(d)}), ' ' + lab)); if (n) t.append(el('div', {class: 'n', text: n})); return t; };
+  /* ---- adults ---- */
+  {
+    const m = radio('cua-m'), by = radio('cua-by'), Y = A.years, L = Y.length - 1, rate = m === 'rate';
+    const keys = by === 'total' ? [['total', 'All adult prisoners', 'var(--accent)']] : by === 'sex' ? [['male', 'Male', 'var(--s1)'], ['female', 'Female', 'var(--s2)']] : [['ind', 'Aboriginal and Torres Strait Islander', 'var(--s3)'], ['nonind', 'Non-Indigenous', 'var(--s7)']];
+    const series = [];
+    for (const [k, name, color] of keys) {
+      const vals = (rate ? A.rate : A.n)[k], der = new Set(rate ? [] : (A.derived[k] || []));
+      if (!der.size) { series.push({name, color, vals}); continue; }
+      const lastDer = Math.max(...der), cut = Y.indexOf(lastDer) + 1;
+      series.push({name: name + ' (estimated)', color, dash: true, join: true, vals: vals.map((v, i) => i <= cut ? v : null)});
+      series.push({name, color, vals: vals.map((v, i) => i >= cut ? v : null)});
+    }
+    $('#cua-h').textContent = `Adults in prison, Queensland, ${Y.find((y, i) => series.some(s => s.vals[i] != null))}–${Y[L]}`;
+    $('#cua-s').textContent = rate ? 'Prisoners per 100,000 adults of the same group, as published by ABS, at 30 June each year.' : 'Number of prisoners held at 30 June each year.';
+    const tiles = $('#cua-tiles'); tiles.textContent = '';
+    tiles.append(tileEl(`Prisoners, 30 June ${Y[L]}`, fInt(A.n.total[L]), '', chg(A.n.total[L], A.n.total[L - 1]), `on ${Y[L - 1]}`, `${fInt(A.n.total[L - 10])} in ${Y[L - 10]} (${fPct(chg(A.n.total[L], A.n.total[L - 10]))})`),
+      tileEl(`Imprisonment rate, ${Y[L]}`, fRate(A.rate.total[L]), 'per 100,000 adults', chg(A.rate.total[L], A.rate.total[L - 1]), `on ${Y[L - 1]}`, ''),
+      tileEl(`Unsentenced, ${Y[L]}`, nf1.format(A.unsent[L]) + '%', '', null, '', `${nf1.format(A.unsent[L - 10])}% in ${Y[L - 10]}`));
+    const solid = series.filter(s => !s.dash);
+    legend($('#cua-leg'), solid.length > 1 ? solid.concat(series.some(s => s.dash) ? [{name: 'Estimated', color: 'var(--ink-2)', dash: true}] : []) : []);
+    const marks = rate ? A.breaks : [];
+    annualChart($('#cua-chart'), {years: Y, series, marks, aria: `Line chart of adult prisoners in Queensland by year`});
+    const nt = $('#cua-notes'); nt.textContent = '';
+    const notes = [];
+    if (!rate && by !== 'total') notes.push(`Dashed lines (2000–2015) are estimates, marked * in the table: ${by === 'sex' ? 'before 2016 ABS published rates by sex (from 2005) or the share of women (2000–2004) rather than numbers, so numbers are calculated from those, using ABS adult population, and scaled to the published total' : 'before 2016 ABS published the Aboriginal and Torres Strait Islander share of prisoners rather than numbers, so numbers are calculated from that share and the published total'}. Published counts are used from 2016.`);
+    if (rate) notes.push('Dotted lines at 2005 and 2016 mark where the series moves to a later ABS release. Each release revised its rates to newer population estimates, so rates either side are not directly comparable, especially Aboriginal and Torres Strait Islander rates.');
+    if (rate && by === 'sex') notes.push('ABS did not publish rates by sex for Queensland before 2005.');
+    notes.push('Figures before 2017 include periodic detention, as ABS notes. Counts are prisoners on one day (30 June), not everyone imprisoned during the year.');
+    notes.forEach(t => nt.append(el('li', {text: t})));
+    simpleTable($('#cua-tbl'), ['Year', ...keys.map(k => k[1]), 'Unsentenced (%)'], Y.map((y, i) => [y, ...keys.map(([k]) => { const v = (rate ? A.rate : A.n)[k][i]; return v == null ? '' : (rate ? fRate(v) : fInt(v) + (!rate && (A.derived[k] || []).includes(y) ? '*' : '')); }), A.unsent[i] == null ? '' : nf1.format(A.unsent[i])]).reverse(),
+      Y.map((y, i) => [y, ...keys.map(([k]) => { const v = (rate ? A.rate : A.n)[k][i]; return v == null ? '' : v; }), A.unsent[i] == null ? '' : A.unsent[i]]).reverse());
+    annualChart($('#cua-uns'), {years: Y, series: [{name: 'Unsentenced', color: 'var(--accent)', vals: A.unsent}], suffix: '%', height: 220, aria: 'Line chart of the share of adult prisoners unsentenced'});
+    annualChart($('#cua-ratio'), {years: Y, series: [{name: 'Rate ratio', color: 'var(--s3)', vals: A.rate.ratio}], marks: A.breaks, height: 220, aria: 'Line chart of the Indigenous to non-Indigenous imprisonment rate ratio'});
+  }
+  /* ---- young people ---- */
+  {
+    let age = radio('cuy-age'); const by = radio('cuy-by');
+    const Q = Yq.quarters, L = Q.length - 1, idx = Q.map((_, i) => i), short = Q.map(q => q.replace(' qtr ', ' ')), tick = Q.map(q => q.replace(/^\w+ qtr /, ''));
+    const rateOK = age === '10-17';
+    if (!rateOK && radio('cuy-m') === 'rate') $('#cuy-m-n').checked = true;
+    $('#cuy-m-rate').disabled = !rateOK;
+    const rate = radio('cuy-m') === 'rate';
+    const N = Yq.n[age], R = Yq.rate['10-17'];
+    let keys;
+    if (by === 'total') keys = [[rate ? R.total : N.total, age === 'all' ? 'All young people in detention' : 'Aged 10–17', 'var(--accent)']];
+    else if (by === 'sex') keys = [[rate ? R.male : N.male, 'Male', 'var(--s1)'], [rate ? R.female : N.female, 'Female', 'var(--s2)']];
+    else if (by === 'ind') keys = [[rate ? R.ind : N.ind, 'First Nations', 'var(--s3)'], [rate ? R.nonind : N.nonind, 'Non-Indigenous', 'var(--s7)']];
+    else keys = [[rate ? Yq.rate['10-13'].total : Yq.n['10-13'].total, 'Aged 10–13', 'var(--s5)'], [rate ? Yq.rate['14-17'].total : Yq.n['14-17'].total, 'Aged 14–17', 'var(--s1)']].concat(age === 'all' && !rate ? [[Yq.n['18+'].total, 'Aged 18 and over', 'var(--s4)']] : []);
+    const series = keys.map(([vals, name, color]) => ({name, color, vals}));
+    $('#cuy-h').textContent = `Young people in detention, Queensland, ${short[0]} to ${short[L]}`;
+    $('#cuy-s').textContent = (rate ? 'Young people in detention per 10,000 people aged 10–17 of the same group, on an average night in each quarter.' : 'Average number of young people in detention on a night in each quarter.') + (age === 'all' ? ' Includes people aged 18 and over held in youth detention.' : '');
+    const T = Yq.n[age].total, Rt = R.total, U = Yq.unsent[age].total;
+    const tiles = $('#cuy-tiles'); tiles.textContent = '';
+    tiles.append(tileEl(`Average night, ${short[L]}`, fInt(T[L]), age === 'all' ? 'all ages' : 'aged 10–17', chg(T[L], T[L - 4]), 'on a year earlier', `${fInt(T[0])} in ${short[0]}`),
+      tileEl(`Rate, ${short[L]}`, nf2.format(Rt[L]), 'per 10,000 aged 10–17', chg(Rt[L], Rt[L - 4]), 'on a year earlier', ''),
+      tileEl(`Unsentenced, ${short[L]}`, Math.round(U[L] / T[L] * 100) + '%', '', null, '', `${Math.round(U[0] / T[0] * 100)}% in ${short[0]}`));
+    legend($('#cuy-leg'), series.length > 1 ? series : []);
+    annualChart($('#cuy-chart'), {years: idx, labels: short, tickLabels: tick.map((t, i) => Q[i].startsWith('Jun') ? 'Jun ' + t : ''), series, aria: 'Line chart of young people in detention in Queensland by quarter'});
+    const nt = $('#cuy-notes'); nt.textContent = '';
+    const notes = ['Numbers are averages across the nights in each quarter, so they are not whole numbers. Small groups move a lot from quarter to quarter, as AIHW cautions.'];
+    if (rate && by === 'sex') notes.push('Rates by sex are calculated here from AIHW counts and ABS population aged 10–17 of the same sex; AIHW does not publish them. Calculated the same way, the total rate is within 1% of the rate AIHW publishes.');
+    if (rate && by !== 'sex') notes.push('Rates as published by AIHW. AIHW does not publish a rate where fewer than five young people were in detention.');
+    if (by === 'age' && rate) notes.push('Rates for 10–13 and 14–17 use the population of the same age.');
+    if (age === 'all') notes.push('All ages includes a small number of people aged 18 and over who are in youth detention because of the age at which they offended. Rates are only available for ages 10–17.');
+    notes.forEach(t => nt.append(el('li', {text: t})));
+    simpleTable($('#cuy-tbl'), ['Quarter', ...series.map(s => s.name), 'Unsentenced'], idx.map(i => [short[i], ...series.map(s => s.vals[i] == null ? '' : (rate ? nf2.format(s.vals[i]) : nf1.format(s.vals[i]))), nf1.format(U[i])]).reverse(),
+      idx.map(i => [short[i], ...series.map(s => s.vals[i] == null ? '' : s.vals[i]), U[i]]).reverse());
+    const su = [{name: 'All', color: 'var(--accent)', vals: idx.map(i => U[i] / T[i] * 100)}, {name: 'First Nations', color: 'var(--s3)', vals: idx.map(i => Yq.unsent[age].ind[i] / Yq.n[age].ind[i] * 100)}, {name: 'Non-Indigenous', color: 'var(--s7)', vals: idx.map(i => Yq.unsent[age].nonind[i] / Yq.n[age].nonind[i] * 100)}];
+    $('#cuy-uns-s').textContent = `Share of young people in detention (${age === 'all' ? 'all ages' : 'aged 10–17'}) who were unsentenced, on an average night in each quarter.`;
+    legend($('#cuy-uns-leg'), su);
+    annualChart($('#cuy-uns'), {years: idx, labels: short, tickLabels: tick.map((t, i) => Q[i].startsWith('Jun') ? 'Jun ' + t : ''), series: su, suffix: '%', height: 220, aria: 'Line chart of the share of young people in detention who were unsentenced'});
+    annualChart($('#cuy-ratio'), {years: idx, labels: short, tickLabels: tick.map((t, i) => Q[i].startsWith('Jun') ? 'Jun ' + t : ''), series: [{name: 'Rate ratio', color: 'var(--s3)', vals: R.ratio}], height: 220, aria: 'Line chart of the First Nations to non-Indigenous youth detention rate ratio'});
+  }
+}
+
 /* ---------- routing & wiring ---------- */
-const VIEWS = ['trends', 'changes', 'map', 'funnel', 'mix', 'seifa', 'victims', 'about'];
+const VIEWS = ['trends', 'changes', 'map', 'funnel', 'mix', 'seifa', 'victims', 'custody', 'about'];
 let locCombo;
 function fatal(e) { const f = $('#fatal'); f.hidden = false; f.textContent = (e && e.message ? e.message : String(e)) + '. If you opened this page straight from a folder, serve it through a web server instead (for example: python3 -m http.server).'; }
 function route() {
@@ -1959,18 +2097,19 @@ function route() {
   $$('nav.tabs a').forEach(a => { if (a.dataset.view === v) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   render();
 }
-function render() { if (!META) return; if (state.view === 'trends') renderTrends(); else if (state.view === 'changes') renderChanges(); else if (state.view === 'map') renderMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') { mixCombo.set(locName(state.loc)); renderMix(); } else if (state.view === 'victims') renderVictims(); else if (state.view === 'seifa') renderSeifa(); else renderAbout(); }
+function render() { if (!META) return; if (state.view === 'trends') renderTrends(); else if (state.view === 'changes') renderChanges(); else if (state.view === 'map') renderMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') { mixCombo.set(locName(state.loc)); renderMix(); } else if (state.view === 'victims') renderVictims(); else if (state.view === 'seifa') renderSeifa(); else if (state.view === 'custody') renderCustody(); else renderAbout(); }
 async function init() {
   try { [META, POP] = await Promise.all([getJSON('meta.json'), getJSON('pop.json')]); } catch (e) { return fatal(e); }
   T = META.months;
   $('#tagline').textContent = `Reported offences, offenders and victims per 100,000 population, January ${META.start_year} to ${monthLabel(T - 1)}`;
-  $('#foot').textContent = `Sources: Queensland Police Service open data (offences, offenders, victims, division boundaries); Australian Bureau of Statistics (population, LGA boundaries). Built ${META.built}.`;
+  $('#foot').textContent = `Sources: Queensland Police Service open data (offences, offenders, victims, division boundaries); Australian Bureau of Statistics (population, LGA boundaries, area disadvantage, victims, prisoners); Australian Institute of Health and Welfare (youth detention). Built ${META.built}.`;
   const fillOff = sel => { for (const o of META.offences) sel.append(el('option', {value: o.id, text: '   '.repeat(o.lvl) + o.name})); };
   $$('.offsel').forEach(s => { fillOff(s); s.addEventListener('change', () => { setOff(+s.value); render(); }); });
   const co = $('#c-off'); co.append(el('option', {value: 'main', text: 'Main categories (' + META.offences.filter(o => o.lvl <= 1).length + ')'}), el('option', {value: 'allsub', text: 'All categories and sub-categories (' + META.offences.length + ')'})); fillOff(co);
   const cb = $('#c-base'); [1, 2, 3, 5, 10, 20].forEach(y => { if (y < META.win_end.length) cb.append(el('option', {value: y, text: (y === 1 ? 'the previous 12 months' : y + ' years earlier') + ' (to ' + monthLabel(META.win_end[y]) + ')'})); });
   $$('#m-win, #f-win, #s-win').forEach(mw => META.win_end.forEach((e, k) => mw.append(el('option', {value: k, text: monthLabel(e)}))));
   $$('#v-seifa select:not(.offsel), #v-seifa input').forEach(i => i.addEventListener('change', renderSeifa));
+  $$('#v-custody input').forEach(i => i.addEventListener('change', renderCustody));
   const xp = $('#x-parent'); xp.append(el('option', {value: 'all', text: 'All offences, by division'}));
   META.offences.filter(o => META.offences.some(c => c.parent === o.id)).forEach(o => xp.append(el('option', {value: o.id, text: '\u00A0\u00A0\u00A0'.repeat(o.lvl) + o.name})));
   mixCombo = combo($('#x-loc'), {initial: 'Queensland', placeholder: 'Search LGAs and police divisions', groups: () => placeGroups(true), onPick: it => { state.loc = it.loc; locCombo.set(locName(it.loc)); renderMix(); }});
@@ -1982,7 +2121,7 @@ async function init() {
   $$('#v-changes select, #v-changes input').forEach(i => i.addEventListener('change', renderChanges));
   $$('#m-meas, #m-win, #m-show, #m-sidx, input[name="m-geo"], input[name="m-mode"]').forEach(i => i.addEventListener('change', renderMap));
   window.addEventListener('hashchange', route);
-  let rz; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => { if (state.view === 'trends') renderTrends(); else if (state.view === 'map') drawMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') renderMix(); else if (state.view === 'victims') renderVictims(); else if (state.view === 'seifa') renderSeifa(); }, 120); }).observe($('main'));
+  let rz; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => { if (state.view === 'trends') renderTrends(); else if (state.view === 'map') drawMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') renderMix(); else if (state.view === 'victims') renderVictims(); else if (state.view === 'seifa') renderSeifa(); else if (state.view === 'custody') renderCustody(); }, 120); }).observe($('main'));
   const retheme = () => { if (state.view === 'map' && M.ready) renderMap(); };
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', retheme);
   new MutationObserver(retheme).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});

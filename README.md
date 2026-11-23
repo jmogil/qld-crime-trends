@@ -1,12 +1,13 @@
 # Queensland crime trends <img src="assets/readme-hex.svg" align="right" width="150" alt="Queensland crime trends hex logo" />
 
 An interactive dashboard of reported offences, offenders and victims in Queensland, per 100,000
-population, by crime type and location, with area disadvantage (ABS SEIFA) alongside. Built from publicly available Queensland Police Service (QPS) and
-Australian Bureau of Statistics (ABS) data sets.
+population, by crime type and location, with area disadvantage (ABS SEIFA) and people in custody alongside. Built from publicly available
+Queensland Police Service (QPS), Australian Bureau of Statistics (ABS) and Australian Institute of Health and Welfare (AIHW) data sets.
 
 Views: Trends (offence rate; adult and juvenile offender and victim rates, by sex), Biggest changes, Map
 (rates or SEIFA disadvantage), Funnel plot (areas against the Queensland rate), Offence mix, Disadvantage
-(rates against SEIFA), Victims (QPS monthly by place; ABS annual detail), and About the data (sources and method).
+(rates against SEIFA), Victims (QPS monthly by place; ABS annual detail), Custody (adults in prison and young people in detention,
+by sex and Indigenous status), and About the data (sources and method).
 
 ## How this repository works
 
@@ -61,6 +62,31 @@ Inputs: `SEIFA2021_LGA_Indexes.xlsx` and `SEIFA2021_SA1_Indexes.xlsx` (ABS SEIFA
 `SA1_2021_AUST_SHP_GDA2020.zip` (ABS SA1 boundaries), `LGA_2025_AUST_GDA2020.zip` and `QPS_DIVISIONS.zip`.
 Rebuild when ABS publishes SEIFA from the 2026 Census, or if QPS division boundaries change.
 
+## The Custody tab (about once a year)
+
+`data/custody.json` holds Queensland adult prisoner numbers at 30 June from 2000 (ABS, Prisoners in Australia)
+and young people in detention on an average night in each quarter from June 2021 (AIHW, Youth detention
+population in Australia). It is built by `build_custody.py` from the files in `custody-source/` and is not part
+of the monthly refresh. Before 2016, adult numbers by sex and Indigenous status are estimated from published
+shares and rates; the build prints how well that method reproduces the published counts from 2016.
+
+When ABS publishes a new Prisoners in Australia release
+(https://www.abs.gov.au/statistics/people/crime-and-justice/prisoners-australia/latest-release):
+
+1. Move `custody-source/current/abs_prisoner_characteristics_<year>.xlsx` to `custody-source/earlier/`
+   (keep its name; older years drop out of each new ten-year table, so earlier releases are kept).
+2. Save data cube 2 (Prisoner characteristics, States and territories, Tables 15–35) of the new release as
+   `custody-source/current/abs_prisoner_characteristics_<new year>.xlsx`.
+
+When AIHW publishes a new Youth detention population in Australia report, replace the supplementary tables in
+`custody-source/aihw/`. Then run:
+
+    python build_custody.py --current custody-source/current/abs_prisoner_characteristics_<year>.xlsx \
+      --earlier custody-source/earlier --aihw custody-source/aihw/<file>.xlsx \
+      --erp source-files/3101053.xlsx --out data/custody.json
+
+Check the dates in the About text (the Custody section names the releases used) and commit.
+
 ## Running it yourself
 
     pip install pandas numpy openpyxl
@@ -81,10 +107,12 @@ Queensland and LGAs. They are too large to keep in the repository.
 - ABS, ASGS Edition 3 digital boundary files (LGA 2025, SA1 2021)
 - ABS, Socio-Economic Indexes for Areas (SEIFA), 2021: https://www.abs.gov.au/statistics/people/people-and-communities/socio-economic-indexes-areas-seifa-australia/latest-release
 - ABS, Recorded Crime – Victims: https://www.abs.gov.au/statistics/people/crime-and-justice/recorded-crime-victims/latest-release
+- ABS, Prisoners in Australia (2010, 2015 and 2025 releases): https://www.abs.gov.au/statistics/people/crime-and-justice/prisoners-australia/latest-release
+- AIHW, Youth detention population in Australia 2025: https://www.aihw.gov.au/reports/youth-justice/youth-detention-population-in-australia-2025/contents/trends-in-sentenced-and-unsentenced-detention
 - Spearman confidence intervals: Bonett DG, Wright TA (2000). Sample size requirements for estimating
   Pearson, Kendall and Spearman correlations. Psychometrika. https://doi.org/10.1007/BF02294183
 - Funnel plot method: Spiegelhalter DJ (2005). Funnel plots for comparing institutional performance.
   Statistics in Medicine. https://doi.org/10.1002/sim.1970
 
-The source data remain subject to the QPS and ABS terms of use; check those before reusing the data.
-This dashboard is an independent analysis and is not a QPS or ABS product.
+The source data remain subject to the QPS, ABS and AIHW terms of use; check those before reusing the data.
+This dashboard is an independent analysis and is not a QPS, ABS or AIHW product.
