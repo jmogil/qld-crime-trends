@@ -75,6 +75,15 @@ nav.tabs .reset::before{content:"\21BA";margin-right:6px;font-size:14px}
 nav.tabs .reset:hover{color:var(--accent);border-color:var(--accent)}
 nav.tabs .reset:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 main{padding:18px 0 40px}
+.intro{max-width:96ch;font-size:14px;line-height:1.55;color:var(--ink-2)}
+.intro summary{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;font-size:13px;font-weight:600;color:var(--accent);border-radius:6px;padding:2px 0}
+.intro summary::-webkit-details-marker{display:none}
+.intro summary:hover span{text-decoration:underline;text-underline-offset:2px}
+.intro summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.intro summary svg{flex:none}
+.intro summary .chev{transition:transform .15s}
+.intro[open] summary .chev{transform:rotate(180deg)}
+.intro p{margin:4px 0 0}
 .view{display:flex;flex-direction:column;gap:14px}
 .filters{display:flex;flex-wrap:wrap;gap:12px 14px;align-items:flex-end}
 .field{display:flex;flex-direction:column;gap:4px;min-width:0}
@@ -231,7 +240,7 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
       <img class="logo" src="assets/logo.svg" width="58" height="67" alt="">
       <h1>Queensland crime trends</h1>
       <p id="tagline">Reported offences, offenders and victims per 100,000 population, by crime type and location</p>
-      <p class="prov">Based on publicly available data sets from the Queensland Police Service (QPS) and the Australian Bureau of Statistics (ABS). <a href="#about">Sources and method</a></p>
+      <p class="prov">Based on publicly available data sets from the Queensland Police Service (QPS), the Australian Bureau of Statistics (ABS) and the Australian Institute of Health and Welfare (AIHW). <a href="#about">Sources and method</a></p>
     </div>
     <nav class="tabs" aria-label="Views">
       <a href="#trends" data-view="trends">Trends</a>
@@ -2085,6 +2094,36 @@ async function renderCustody() {
   }
 }
 
+/* ---------- tab introductions ---------- */
+const INTRO = {
+  trends: 'How often crime is reported in Queensland and how that has changed since 2001. Choose a place and a type of crime to see three measures over time: offences reported to police, offenders (adults and young people), and victims. All three are shown per 100,000 people so places of different sizes can be compared. Police count an offender each time they take action over an offence, so one person can be counted more than once.',
+  changes: 'Which places and types of crime have risen or fallen the most. The latest 12 months are compared with an earlier 12-month period that you choose. Changes are shown as rates per 100,000 people, so population growth is taken into account. Very small numbers are left out because they can swing a lot by chance.',
+  map: 'Crime rates across Queensland, by local government area or police division, for the latest 12 months or as a change over time. Use the switch to show area disadvantage (from the 2021 Census) on the map instead. Rates in small, remote communities can look very high because a few offences make a big difference.',
+  funnel: 'A check on which places really stand out from the Queensland rate. In places with few people, rates jump around a lot by chance alone. The funnel shows how far a rate can stray from the state rate for that reason. Places outside the funnel are less likely to be explained by chance and are listed below the chart.',
+  mix: 'How the make-up of reported crime has changed over time. For a broad crime group, see each type’s share of offences, or its rate per 100,000 people, for each 12-month period.',
+  seifa: 'Whether crime rates are higher in more disadvantaged areas. Each area’s rate is compared with its ABS score for social and economic disadvantage, which is based on the 2021 Census. This shows a pattern across areas, not cause and effect. The scores describe areas, not the individual people who offend or are victimised.',
+  victims: 'People recorded by police as victims of crime. Victim numbers from the Queensland Police Service are updated monthly by place and type of crime. Yearly detail from the ABS covers victims’ age and sex, their relationship to the offender, family and domestic violence, and how long sexual assaults take to be reported. One person can be counted more than once.',
+  custody: 'How many adults are in prison and young people are in youth detention in Queensland, and how this has changed. Results are shown by sex and by Aboriginal and Torres Strait Islander status, along with the share held on remand (in custody but not yet sentenced).',
+  about: 'Where the figures come from, what they count and how the rates are worked out, along with cautions for reading them.'
+};
+function buildIntros() {
+  let open = true; try { open = localStorage.getItem('qct-intro') !== 'closed'; } catch (e) {}
+  const info = '<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.2M8 4.6v.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
+  const chev = '<svg class="chev" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 3.5 5 7l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  for (const [v, text] of Object.entries(INTRO)) {
+    const sec = $('#v-' + v); if (!sec) continue;
+    const d = el('details', {class: 'intro'}); d.open = open;
+    const sm = el('summary'); sm.innerHTML = info + '<span>About this tab</span>' + chev;
+    d.append(sm, el('p', {text}));
+    d.addEventListener('toggle', () => {
+      if (d.dataset.sync) { delete d.dataset.sync; return; }
+      try { localStorage.setItem('qct-intro', d.open ? 'open' : 'closed'); } catch (e) {}
+      $$('details.intro').forEach(o => { if (o !== d && o.open !== d.open) { o.dataset.sync = '1'; o.open = d.open; } });
+    });
+    sec.prepend(d);
+  }
+}
+
 /* ---------- routing & wiring ---------- */
 const VIEWS = ['trends', 'changes', 'map', 'funnel', 'mix', 'seifa', 'victims', 'custody', 'about'];
 let locCombo;
@@ -2099,6 +2138,7 @@ function route() {
 }
 function render() { if (!META) return; if (state.view === 'trends') renderTrends(); else if (state.view === 'changes') renderChanges(); else if (state.view === 'map') renderMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') { mixCombo.set(locName(state.loc)); renderMix(); } else if (state.view === 'victims') renderVictims(); else if (state.view === 'seifa') renderSeifa(); else if (state.view === 'custody') renderCustody(); else renderAbout(); }
 async function init() {
+  buildIntros();
   try { [META, POP] = await Promise.all([getJSON('meta.json'), getJSON('pop.json')]); } catch (e) { return fatal(e); }
   T = META.months;
   $('#tagline').textContent = `Reported offences, offenders and victims per 100,000 population, January ${META.start_year} to ${monthLabel(T - 1)}`;
