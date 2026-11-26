@@ -1508,7 +1508,7 @@ function renderAbout() {
     caution,
     H('About this site'),
     P(`This site shows how crime recorded by police in Queensland has changed since January ${META.start_year}. You can look at Queensland as a whole, any of its ${META.lgas.length} local government areas (council areas), or any of ${META.divisions.length} police divisions, for ${META.offences.length} types of offence.`),
-    P('It is built entirely from data sets that the Queensland Police Service (QPS) and the Australian Bureau of Statistics (ABS) publish for anyone to use. It is an independent analysis of those data and is not a QPS or ABS product.'),
+    P('It is built entirely from data sets that the Queensland Police Service (QPS), the Australian Bureau of Statistics (ABS) and the Australian Institute of Health and Welfare (AIHW) publish for anyone to use. It is an independent analysis of those data by James Ogilvie and is not a QPS, ABS or AIHW product.'),
     H('How often it is updated'),
     P(`The data are refreshed every month. This version covers January ${META.start_year} to ${latest} and was last updated on ${builtText}.`),
     H('What you can do here'),
@@ -1594,7 +1594,27 @@ function renderAbout() {
       li(B('Offence mix '), 'shows each category’s share of the offences in its parent group, or the stacked rate, for each 12 months ending in the latest month of data. QPS does not publish a total across all offences, so the all-offences view is the sum of the three QPS offence divisions. Where a group has more than seven categories, the seven largest statewide are shown and the rest are combined.'),
       li(B('Victim rates. '), 'Where ABS publishes a victimisation rate (homicide, assault, sexual assault and kidnapping or abduction; age and sex for the latest year; family and domestic violence), that rate is shown. Otherwise the rate is calculated here as ABS victim counts per 100,000 of the ABS estimated resident population of Queensland at 30 June of the same year, in the matching age group and sex. Calculated this way, the age and sex rates for the latest year agree with those ABS publishes to within 0.4%.'),
       li(B('Victim age series. '), 'ABS publishes victims by age for the latest year only, so the series from 2010 is assembled from the release for each year, as first published. Those figures are not revised when ABS later updates its totals. Sexual assault from 2014 is the exception: it uses the revised figures in the latest release. Homicide by age is not available for 2015. ABS randomly adjusts the cells in its tables to protect confidentiality, so the parts do not always add exactly to the total.'),
-      li(B('Boundaries. '), 'Police division boundaries are the current QPS boundaries. Map shapes are simplified for display and are not survey-accurate.')));
+      li(B('Boundaries. '), 'Police division boundaries are the current QPS boundaries. Map shapes are simplified for display and are not survey-accurate.')),
+    H('Disclaimer'),
+    P('This dashboard is an independent analysis by James Ogilvie. It is not produced, checked or endorsed by the Queensland Police Service, the Australian Bureau of Statistics or the Australian Institute of Health and Welfare, and any errors in processing, analysis or presentation are mine, not theirs. Figures are provided as is, without warranty. They may differ from official publications because agencies revise their data and because of the methods described on this page. For official statistics, use the agencies’ own releases.'),
+    H('Not for operational use'),
+    P('This site summarises crime recorded by police in the past, for general information. It is not updated in real time and should not be used to make decisions about personal safety, policing or individual cases.'),
+    P('To report a crime (', link('Queensland Police Service, Contact us', 'https://www.police.qld.gov.au/contact-us'), '):'),
+    el('ul', null,
+      li(B('Emergency: '), 'call Triple Zero (000) if a crime is happening now or a life is threatened.'),
+      li(B('Non-urgent: '), 'contact Policelink on 131 444 (24 hours, 7 days) or report online.'),
+      li(B('Anonymous: '), 'contact Crime Stoppers on 1800 333 000.')),
+    H('Data attribution'),
+    P('The source data are used under Creative Commons Attribution licences. Their publishers have not reviewed or endorsed this site, and nothing here should be read as their view.'),
+    el('ul', null,
+      li('Contains data from the Queensland Police Service, published on the ', link('Queensland Government open data portal', 'https://www.data.qld.gov.au/organization/police'), ' and the ', link('QPS Maps and statistics', 'https://www.police.qld.gov.au/maps-and-statistics'), ' page.'),
+      li('Based on Australian Bureau of Statistics data (', link('ABS copyright and licence', 'https://www.abs.gov.au/website-privacy-copyright-and-disclaimer'), ').'),
+      li('Based on Australian Institute of Health and Welfare material (', link('AIHW copyright and licence', 'https://www.aihw.gov.au/copyright'), ').')),
+    H('Licence'),
+    P('© 2026 James Ogilvie. Except where noted, the text, charts and derived data on this site are licensed under a ', link('Creative Commons Attribution 4.0 International licence (CC BY 4.0)', 'https://creativecommons.org/licenses/by/4.0/'), ': you may share and adapt them for any purpose, provided you give credit, link to the licence and indicate what you changed. The code is released under the ', link('MIT licence', 'https://github.com/jmogil/qld-crime-trends/blob/main/LICENSE-CODE'), '. The source data remain under their publishers’ licences (see Data attribution).'),
+    P(B('Suggested citation: '), 'Ogilvie, J. (2026). ', el('i', {text: 'Queensland crime trends'}), ' [Interactive dashboard]. https://jmogil.github.io/qld-crime-trends/'),
+    H('Comments and corrections'),
+    P('If you spot an error or something that doesn’t look right, please ', link('open an issue on GitHub', 'https://github.com/jmogil/qld-crime-trends/issues'), ' so it can be tracked and fixed. For other comments and enquiries, email James Ogilvie at ', el('a', {href: 'mailto:j.ogilvie.psychology@gmail.com', text: 'j.ogilvie.psychology@gmail.com'}), '.'));
 }
 
 /* ---------- generic annual charts (used by the Victims tab) ---------- */

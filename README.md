@@ -114,5 +114,45 @@ Queensland and LGAs. They are too large to keep in the repository.
 - Funnel plot method: Spiegelhalter DJ (2005). Funnel plots for comparing institutional performance.
   Statistics in Medicine. https://doi.org/10.1002/sim.1970
 
-The source data remain subject to the QPS, ABS and AIHW terms of use; check those before reusing the data.
-This dashboard is an independent analysis and is not a QPS, ABS or AIHW product.
+## Disclaimer
+
+This dashboard is an independent analysis by James Ogilvie. It is not produced, checked or endorsed by the
+Queensland Police Service, the Australian Bureau of Statistics or the Australian Institute of Health and Welfare,
+and any errors in processing, analysis or presentation are mine, not theirs. Figures are provided as is, without
+warranty, and may differ from official publications because agencies revise their data and because of the methods
+used here. For official statistics, use the agencies' own releases.
+
+The site summarises crime recorded by police in the past, for general information. It is not updated in real time
+and is not for operational use. To report a crime: call Triple Zero (000) if a crime is happening now or a life is
+threatened; contact Policelink on 131 444 (24 hours, 7 days) or online for non-urgent matters; or contact Crime
+Stoppers on 1800 333 000 to report anonymously (https://www.police.qld.gov.au/contact-us).
+
+## Data attribution
+
+The source data are used under Creative Commons Attribution licences. Their publishers have not reviewed or
+endorsed this work.
+
+- Contains data from the Queensland Police Service, published on the Queensland Government open data portal
+  (https://www.data.qld.gov.au/organization/police) and QPS Maps and statistics (https://www.police.qld.gov.au/maps-and-statistics).
+- Based on Australian Bureau of Statistics data (https://www.abs.gov.au/website-privacy-copyright-and-disclaimer).
+- Based on Australian Institute of Health and Welfare material (https://www.aihw.gov.au/copyright).
+
+## Licence
+
+© 2026 James Ogilvie.
+
+- Content (the text, charts and derived data, including `data/`): Creative Commons Attribution 4.0 International
+  (CC BY 4.0); see [LICENSE](LICENSE). You may share and adapt it for any purpose, provided you give credit, link
+  to the licence and indicate what you changed.
+- Code (the scripts and styles in `index.html`, the `build_*.py` scripts and the workflow files): MIT; see
+  [LICENSE-CODE](LICENSE-CODE).
+- Agency files kept in `source-files/`, `victims-source/` and `custody-source/` remain under their publishers'
+  licences.
+
+Suggested citation: Ogilvie, J. (2026). *Queensland crime trends* [Interactive dashboard].
+https://jmogil.github.io/qld-crime-trends/
+
+## Comments and corrections
+
+If you spot an error, please [open an issue](https://github.com/jmogil/qld-crime-trends/issues) so it can be
+tracked and fixed. For other comments and enquiries, email j.ogilvie.psychology@gmail.com.
