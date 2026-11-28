@@ -66,6 +66,9 @@ header.top{background:var(--surface);border-bottom:1px solid var(--hair)}
 .brand h1{margin:0;font-size:22px;line-height:1.2;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
 .brand p{margin:3px 0 0;color:var(--ink-2);font-size:13px}
 .brand p.prov{color:var(--ink);font-weight:500}
+.brand h1 a{color:inherit;text-decoration:none;border-radius:4px}
+.brand h1 a:hover{color:var(--accent)}
+.brand h1 a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 nav.tabs{display:flex;gap:2px;flex-wrap:wrap}
 nav.tabs a{padding:9px 14px 11px;text-decoration:none;color:var(--ink-2);font-weight:600;border-bottom:3px solid transparent;border-radius:6px 6px 0 0}
 nav.tabs a:hover{background:var(--wash);color:var(--ink)}
@@ -238,7 +241,7 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
   <div class="wrap">
     <div class="brand">
       <img class="logo" src="assets/logo.svg" width="58" height="67" alt="">
-      <h1>Queensland crime trends</h1>
+      <h1><a href="#trends" id="home" title="Go to the Trends tab">Queensland crime trends</a></h1>
       <p id="tagline">Reported offences, offenders and victims per 100,000 population, by crime type and location</p>
       <p class="prov">Based on publicly available data sets from the Queensland Police Service (QPS), the Australian Bureau of Statistics (ABS) and the Australian Institute of Health and Welfare (AIHW). <a href="#about">Sources and method</a></p>
     </div>
@@ -268,6 +271,11 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
         <div class="seg" role="radiogroup" aria-label="Time step">
           <input type="radio" name="t-mode" id="t-mode-roll" value="roll" checked><label for="t-mode-roll">Rolling 12 months</label>
           <input type="radio" name="t-mode" id="t-mode-month" value="month"><label for="t-mode-month">Monthly</label>
+        </div></div>
+      <div class="field"><span class="lab">Show</span>
+        <div class="seg" role="radiogroup" aria-label="Show">
+          <input type="radio" name="t-meas" id="t-meas-rate" value="rate" checked><label for="t-meas-rate">Rate per 100,000</label>
+          <input type="radio" name="t-meas" id="t-meas-n" value="n"><label for="t-meas-n">Number</label>
         </div></div>
       <div class="field"><span class="lab">Period</span>
         <div class="seg" role="radiogroup" aria-label="Period">
@@ -496,6 +504,8 @@ footer{color:var(--muted);font-size:12px;padding:0 0 30px}
           <div class="field"><span class="lab">Change over</span><div class="seg" role="radiogroup" aria-label="Change over">
             <input type="radio" name="vil-w" id="vil-w1" value="1" checked><label for="vil-w1">12 months</label>
             <input type="radio" name="vil-w" id="vil-w2" value="2"><label for="vil-w2">2 years</label>
+            <input type="radio" name="vil-w" id="vil-w3" value="3"><label for="vil-w3">3 years</label>
+            <input type="radio" name="vil-w" id="vil-w4" value="4"><label for="vil-w4">4 years</label>
             <input type="radio" name="vil-w" id="vil-w5" value="5"><label for="vil-w5">5 years</label></div></div>
           <label class="check"><input type="checkbox" id="vil-sub"> Show sub-types</label>
         </div>
@@ -765,6 +775,14 @@ function rateSeries(c, p, mode) {
   for (let t = 0; t < T; t++) { sc += c[t]; sp += p[t]; if (t >= 12) { sc -= c[t - 12]; sp -= p[t - 12]; } if (t >= 11) out[t] = sp > 0 ? sc / (sp / 12) * 1e5 : null; }
   return out;
 }
+/* count series: 'month' = count in the month; 'roll' = total over the 12 months ending at t (null wherever the rate is null) */
+function countSeries(c, p, mode) {
+  const r = rateSeries(c, p, mode), out = new Array(T).fill(null);
+  if (!c) return out;
+  let s = 0;
+  for (let t = 0; t < T; t++) { s += c[t]; if (t >= 12) s -= c[t - 12]; if (r[t] != null) out[t] = mode === 'month' ? c[t] : s; }
+  return out;
+}
 const addArr = (a, b) => { if (!a || !b) return null; const o = new Float64Array(a.length); for (let i = 0; i < a.length; i++) o[i] = a[i] + b[i]; return o; };
 const sumRange = (a, t0, t1) => { let s = 0; for (let t = t0; t <= t1; t++) s += a[t]; return s; };
 
@@ -825,7 +843,7 @@ function lineChart(host, cfg) {
   let ymax = 0;
   for (const s of cfg.series) for (let t = t0; t <= t1; t++) if (s.vals[t] != null && s.vals[t] > ymax) ymax = s.vals[t];
   if (!(ymax > 0)) ymax = 1;
-  const step = niceStep(ymax * 1.04, 4.5), ytop = Math.ceil(ymax * 1.04 / step) * step;
+  const fmt = cfg.fmt || fRate, step = cfg.int ? Math.max(1, niceStep(ymax * 1.04, 4.5)) : niceStep(ymax * 1.04, 4.5), ytop = Math.ceil(ymax * 1.04 / step) * step;
   const x = t => m.l + (t1 === t0 ? 0 : (t - t0) / (t1 - t0) * pw), y = v => m.t + ph - v / ytop * ph;
   const svg = sv('svg', {viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', tabindex: 0, 'aria-label': cfg.aria});
   const dec = [0, 1, 2, 3].find(d => Math.abs(step * 10 ** d - Math.round(step * 10 ** d)) < 1e-6) ?? 2;
@@ -856,7 +874,7 @@ function lineChart(host, cfg) {
   let prevY = -99;
   for (const e of ends) {
     svg.append(sv('circle', {cx: x(e.t), cy: e.yy, r: 4, fill: e.s.color, stroke: 'var(--surface)', 'stroke-width': 2}));
-    if (e.yy - prevY >= 14 && e.t === t1) { svg.append(sv('text', {class: 'endlab', x: x(e.t) + 9, y: e.yy + 4, text: fRate(e.v)})); prevY = e.yy; }
+    if (e.yy - prevY >= 14 && e.t === t1) { svg.append(sv('text', {class: 'endlab', x: x(e.t) + 9, y: e.yy + 4, text: fmt(e.v)})); prevY = e.yy; }
   }
   const cross = sv('line', {y1: m.t, y2: m.t + ph, stroke: 'var(--muted)', 'stroke-width': 1, visibility: 'hidden'});
   const dots = cfg.series.map(s => sv('circle', {r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, visibility: 'hidden'}));
@@ -872,7 +890,7 @@ function lineChart(host, cfg) {
       if (v == null) { dots[i].setAttribute('visibility', 'hidden'); return; }
       dots[i].setAttribute('cx', x(cur)); dots[i].setAttribute('cy', y(v)); dots[i].setAttribute('visibility', 'visible');
       const key = el('i'); key.style.borderTopColor = s.color; if (s.dash) key.style.borderTopStyle = 'dashed';
-      tip.append(el('div', {class: 'r'}, key, el('b', {text: fRate(v)}), el('span', {text: s.name})));
+      tip.append(el('div', {class: 'r'}, key, el('b', {text: fmt(v)}), el('span', {text: s.name})));
     });
     tip.hidden = false;
     const px = x(cur) / W * host.clientWidth, tw = tip.offsetWidth;
@@ -903,9 +921,9 @@ function dataTable(details, cfg) {
     for (let t = cfg.t1; t >= cfg.t0; t--) {
       if (cfg.series.every(s => s.vals[t] == null)) continue;
       const tr = el('tr', null, el('td', {text: monthLabel(t)}));
-      cfg.series.forEach(s => tr.append(el('td', {class: 'num', text: s.vals[t] == null ? '' : fRate(s.vals[t])})));
+      cfg.series.forEach(s => tr.append(el('td', {class: 'num', text: s.vals[t] == null ? '' : (cfg.fmt || fRate)(s.vals[t])})));
       tb.append(tr);
-      lines.push([monthLabel(t), ...cfg.series.map(s => s.vals[t] == null ? '' : s.vals[t].toFixed(2))].join(','));
+      lines.push([monthLabel(t), ...cfg.series.map(s => s.vals[t] == null ? '' : cfg.int ? Math.round(s.vals[t]) : s.vals[t].toFixed(2))].join(','));
     }
     const btn = el('button', {class: 'btn', type: 'button', text: 'Copy as CSV'});
     btn.addEventListener('click', async () => { try { await navigator.clipboard.writeText(lines.join('\n')); btn.textContent = 'Copied'; } catch (e) { btn.textContent = 'Copy blocked by browser'; } setTimeout(() => { btn.textContent = 'Copy as CSV'; }, 1800); });
@@ -938,80 +956,99 @@ async function renderTrends() {
   cards.forEach(c => c.classList.remove('loading'));
   const mode = $('input[name="t-mode"]:checked').value, yrs = +$('input[name="t-range"]:checked').value;
   const tEnd = T - 1, tMin = mode === 'roll' ? 11 : 0, t0 = yrs ? Math.max(tMin, tEnd - yrs * 12) : tMin;
+  const isN = $('input[name="t-meas"]:checked').value === 'n', fmt = isN ? fInt : fRate;
+  const ser = (cc, pp) => isN ? countSeries(cc, pp, mode) : rateSeries(cc, pp, mode);
   const unitTxt = mode === 'roll' ? 'per 100,000 population per year, rolling 12-month total' : 'per 100,000 population per month';
+  const perTxt = mode === 'roll' ? ', rolling 12-month total' : ' per month';
   const Q = {k: 'q', i: 0}, isDiv = loc.k === 'd', name = locName(loc);
   const c = counts(f, id, 'c', loc), p = pop('c', loc);
-  const offRate = rateSeries(c, p, mode);
+  const offRate = ser(c, p);
+  const nWin = (cc, e) => sumRange(cc, e - 11, e), pctChg = (a, b) => b > 0 ? (a / b - 1) * 100 : null;
   /* tiles: always annual (latest 12 months vs the 12 before) */
   const roll = (cc, pp) => rateSeries(cc, pp, 'roll');
   const tiles = $('#t-tiles'); tiles.textContent = '';
   const rOff = roll(c, p), last = rOff[tEnd], prev = rOff[tEnd - 12];
-  tiles.append(tile('Offence rate, ' + lowerFirst(winLabel(tEnd)), fRate(last), 'per 100,000', prev > 0 ? (last / prev - 1) * 100 : null, fInt(sumRange(c, tEnd - 11, tEnd)) + ' offences reported · population ' + fInt(p[tEnd])));
+  if (isN) tiles.append(tile('Offences, ' + lowerFirst(winLabel(tEnd)), fInt(nWin(c, tEnd)), 'reported', pctChg(nWin(c, tEnd), nWin(c, tEnd - 12)), fRate(last) + ' per 100,000 · population ' + fInt(p[tEnd])));
+  else tiles.append(tile('Offence rate, ' + lowerFirst(winLabel(tEnd)), fRate(last), 'per 100,000', prev > 0 ? (last / prev - 1) * 100 : null, fInt(sumRange(c, tEnd - 11, tEnd)) + ' offences reported · population ' + fInt(p[tEnd])));
   const series2 = [];
   if (!isDiv) {
     const sexSel = $('input[name="t-sex"]:checked').value, ts = sexSel === 'm' || sexSel === 'f' ? sexSel : '';
     const sexWord = {m: 'male', f: 'female'}, sexPl = {m: 'males', f: 'females'};
     const get = (age, sx) => ({c: counts(f, id, age + sx, loc), p: pop(age + sx, loc)});
     const A = get('a', ts), J = get('j', ts), rA = roll(A.c, A.p), rJ = roll(J.c, J.p);
+    if (isN) {
+      const sxLab = ts ? ' ' + sexWord[ts] : '', perA = ts ? ` per 100,000 adult ${sexPl[ts]}` : ' per 100,000 adults', perJ = ts ? ` per 100,000 ${sexPl[ts]} aged 10\u201317` : ' per 100,000 aged 10\u201317';
+      tiles.append(tile(`Adult${sxLab} offender counts`, fInt(nWin(A.c, tEnd)), '', pctChg(nWin(A.c, tEnd), nWin(A.c, tEnd - 12)), fRate(rA[tEnd]) + perA));
+      tiles.append(tile(`Juvenile${sxLab} offender counts`, fInt(nWin(J.c, tEnd)), '', pctChg(nWin(J.c, tEnd), nWin(J.c, tEnd - 12)), fRate(rJ[tEnd]) + perJ));
+    } else {
     tiles.append(tile(ts ? `Adult ${sexWord[ts]} offender rate` : 'Adult offender rate', fRate(rA[tEnd]), ts ? `per 100,000 adult ${sexPl[ts]}` : 'per 100,000 adults', rA[tEnd - 12] > 0 ? (rA[tEnd] / rA[tEnd - 12] - 1) * 100 : null, fInt(sumRange(A.c, tEnd - 11, tEnd)) + ' offender counts \u00B7 ' + fInt(A.p[tEnd]) + (ts ? ` adult ${sexPl[ts]}` : ' adults')));
     tiles.append(tile(ts ? `Juvenile ${sexWord[ts]} offender rate` : 'Juvenile offender rate', fRate(rJ[tEnd]), ts ? `per 100,000 ${sexPl[ts]} aged 10\u201317` : 'per 100,000 aged 10\u201317', rJ[tEnd - 12] > 0 ? (rJ[tEnd] / rJ[tEnd - 12] - 1) * 100 : null, fInt(sumRange(J.c, tEnd - 11, tEnd)) + ' offender counts \u00B7 ' + fInt(J.p[tEnd]) + (ts ? ` ${sexPl[ts]} aged 10\u201317` : ' aged 10\u201317')));
+    }
     const sexes = sexSel === 'mf' ? ['m', 'f'] : [ts];
     for (const sx of sexes) {
       const suffix = sx ? ', ' + sexWord[sx] : '', dash = sexSel === 'mf' && sx === 'f';
       const a = get('a', sx), j = get('j', sx);
-      if ($('#t-a').checked) series2.push({name: 'Adult' + suffix, color: 'var(--s2)', dash, vals: rateSeries(a.c, a.p, mode)});
-      if ($('#t-j').checked) series2.push({name: 'Juvenile' + suffix, color: 'var(--s3)', dash, vals: rateSeries(j.c, j.p, mode)});
-      if ($('#t-all').checked) series2.push({name: 'All aged 10+' + suffix, color: 'var(--s4)', dash, vals: rateSeries(addArr(a.c, j.c), addArr(a.p, j.p), mode)});
+      if ($('#t-a').checked) series2.push({name: 'Adult' + suffix, color: 'var(--s2)', dash, vals: ser(a.c, a.p)});
+      if ($('#t-j').checked) series2.push({name: 'Juvenile' + suffix, color: 'var(--s3)', dash, vals: ser(j.c, j.p)});
+      if ($('#t-all').checked) series2.push({name: 'All aged 10+' + suffix, color: 'var(--s4)', dash, vals: ser(addArr(a.c, j.c), addArr(a.p, j.p))});
     }
   } else {
-    tiles.append(el('div', {class: 'tile'}, el('div', {class: 'k', text: 'Offender rates'}), el('div', {class: 'd', text: 'QPS publishes offender and victim counts for Queensland and local government areas only. Choose an LGA to see offender and victim rates.'})));
+    tiles.append(el('div', {class: 'tile'}, el('div', {class: 'k', text: isN ? 'Offender counts' : 'Offender rates'}), el('div', {class: 'd', text: `QPS publishes offender and victim counts for Queensland and local government areas only. Choose an LGA to see offender and victim ${isN ? 'numbers' : 'rates'}.`})));
   }
   /* victims (QPS): Queensland and LGAs; by age group and sex for offences against the person */
   const vl = o.vic || 0, series3 = [];
   if (!isDiv && vl) {
     const V = roll(counts(f, id, 'v', loc), pop('v', loc));
     const vc = counts(f, id, 'v', loc);
-    tiles.append(tile('Victim rate, ' + lowerFirst(winLabel(tEnd)), fRate(V[tEnd]), 'per 100,000', V[tEnd - 12] > 0 ? (V[tEnd] / V[tEnd - 12] - 1) * 100 : null, fInt(sumRange(vc, tEnd - 11, tEnd)) + ' victims recorded'));
+    if (isN) tiles.append(tile('Victims, ' + lowerFirst(winLabel(tEnd)), fInt(nWin(vc, tEnd)), 'recorded', pctChg(nWin(vc, tEnd), nWin(vc, tEnd - 12)), fRate(V[tEnd]) + ' per 100,000'));
+    else tiles.append(tile('Victim rate, ' + lowerFirst(winLabel(tEnd)), fRate(V[tEnd]), 'per 100,000', V[tEnd - 12] > 0 ? (V[tEnd] / V[tEnd - 12] - 1) * 100 : null, fInt(sumRange(vc, tEnd - 11, tEnd)) + ' victims recorded'));
     if (vl === 2) {
       const vsel = $('input[name="t-vsex"]:checked').value, sexWord = {m: 'male', f: 'female'};
       for (const sx of (vsel === 'mf' ? ['m', 'f'] : [vsel === 'p' ? '' : vsel])) {
         const suffix = sx ? ', ' + sexWord[sx] : '', dash = vsel === 'mf' && sx === 'f';
         const a = {c: counts(f, id, 'va' + sx, loc), p: pop('va' + sx, loc)}, j = {c: counts(f, id, 'vj' + sx, loc), p: pop('vj' + sx, loc)};
-        if ($('#t-va').checked) series3.push({name: 'Adult (18+)' + suffix, color: 'var(--s2)', dash, vals: rateSeries(a.c, a.p, mode)});
-        if ($('#t-vj').checked) series3.push({name: 'Juvenile (0\u201317)' + suffix, color: 'var(--s3)', dash, vals: rateSeries(j.c, j.p, mode)});
-        if ($('#t-vall').checked) series3.push({name: 'All ages' + suffix, color: 'var(--s4)', dash, vals: sx ? rateSeries(addArr(a.c, j.c), addArr(a.p, j.p), mode) : rateSeries(vc, pop('v', loc), mode)});
+        if ($('#t-va').checked) series3.push({name: 'Adult (18+)' + suffix, color: 'var(--s2)', dash, vals: ser(a.c, a.p)});
+        if ($('#t-vj').checked) series3.push({name: 'Juvenile (0\u201317)' + suffix, color: 'var(--s3)', dash, vals: ser(j.c, j.p)});
+        if ($('#t-vall').checked) series3.push({name: 'All ages' + suffix, color: 'var(--s4)', dash, vals: sx ? ser(addArr(a.c, j.c), addArr(a.p, j.p)) : ser(vc, pop('v', loc))});
       }
-    } else series3.push({name: 'All victims', color: 'var(--s4)', vals: rateSeries(vc, pop('v', loc), mode)});
+    } else series3.push({name: 'All victims', color: 'var(--s4)', vals: ser(vc, pop('v', loc))});
   }
   /* notes */
   const notes = $('#t-notes'); notes.textContent = '';
-  if (p[tEnd] < 5000) notes.append(el('div', {class: 'note'}, el('span', null, el('b', {text: 'Small population. '}), `${name} has about ${fInt(p[tEnd])} residents, so a handful of offences moves the rate a long way.`)));
+  if (isN) notes.append(el('div', {class: 'note'}, el('span', null, el('b', {text: 'Numbers, not rates. '}), 'These counts are not adjusted for population, so they grow as the population grows and cannot be compared between places of different sizes. Choose \u201CRate per 100,000\u201D to compare places or periods.')));
+  else if (p[tEnd] < 5000) notes.append(el('div', {class: 'note'}, el('span', null, el('b', {text: 'Small population. '}), `${name} has about ${fInt(p[tEnd])} residents, so a handful of offences moves the rate a long way.`)));
   /* chart 1 */
   const series1 = [{name, color: 'var(--s1)', vals: offRate}];
-  $('#t-cmp-wrap').hidden = loc.k === 'q';
-  if (loc.k !== 'q' && $('#t-cmp').checked) series1.push({name: 'Queensland', color: 'var(--ref)', ref: true, vals: rateSeries(counts(f, id, 'c', Q), pop('c', Q), mode)});
-  $('#t-h1').textContent = `${o.name}: offence rate, ${locFull(loc)}`;
-  $('#t-s1').textContent = `Reported offences ${unitTxt}`;
-  const cfg1 = {series: series1, t0, t1: tEnd, mode, aria: `Line chart of the ${o.name} offence rate in ${name}`};
+  $('#t-cmp-wrap').hidden = loc.k === 'q' || isN;
+  if (loc.k !== 'q' && !isN && $('#t-cmp').checked) series1.push({name: 'Queensland', color: 'var(--ref)', ref: true, vals: rateSeries(counts(f, id, 'c', Q), pop('c', Q), mode)});
+  $('#t-h1').textContent = `${o.name}: ${isN ? 'number of offences' : 'offence rate'}, ${locFull(loc)}`;
+  $('#t-s1').textContent = isN ? `Reported offences${perTxt}` : `Reported offences ${unitTxt}`;
+  const cfg1 = {series: series1, t0, t1: tEnd, mode, fmt, int: isN, aria: `Line chart of the ${o.name} ${isN ? 'number of offences' : 'offence rate'} in ${name}`};
   legend($('#t-leg1'), series1); lineChart($('#t-chart1'), cfg1); dataTable($('#t-tbl1'), cfg1);
   /* chart 2 */
   $('#t-card2').hidden = isDiv;
   if (!isDiv) {
-    $('#t-h2').textContent = `${o.name}: offender rate by age group, ${locFull(loc)}`;
-    $('#t-s2').textContent = `Offender counts per 100,000 people in each age group${mode === 'roll' ? ' per year, rolling 12-month total' : ' per month'}. Counts are offences cleared by action against an offender, not unique people.${$('input[name="t-sex"]:checked').value === 'p' ? '' : ' Male and female rates use same-sex populations; offenders with sex not stated are counted under all persons only.'}`;
-    const cfg2 = {series: series2, t0, t1: tEnd, mode, marks: [{t: META.juv_change_t, label: '17-year-olds counted as juveniles from Feb 2018', short: '17s juvenile from 2018'}], aria: `Line chart of adult and juvenile offender rates for ${o.name} in ${name}`};
+    const sexAll = $('input[name="t-sex"]:checked').value === 'p';
+    $('#t-h2').textContent = `${o.name}: offender ${isN ? 'counts' : 'rate'} by age group, ${locFull(loc)}`;
+    $('#t-s2').textContent = isN
+      ? `Offender counts${perTxt}. Counts are offences cleared by action against an offender, not unique people.${sexAll ? '' : ' Offenders with sex not stated are counted under all persons only.'}`
+      : `Offender counts per 100,000 people in each age group${mode === 'roll' ? ' per year, rolling 12-month total' : ' per month'}. Counts are offences cleared by action against an offender, not unique people.${sexAll ? '' : ' Male and female rates use same-sex populations; offenders with sex not stated are counted under all persons only.'}`;
+    const cfg2 = {series: series2, t0, t1: tEnd, mode, fmt, int: isN, marks: [{t: META.juv_change_t, label: '17-year-olds counted as juveniles from Feb 2018', short: '17s juvenile from 2018'}], aria: `Line chart of adult and juvenile offender ${isN ? 'counts' : 'rates'} for ${o.name} in ${name}`};
     legend($('#t-leg2'), series2); lineChart($('#t-chart2'), cfg2); dataTable($('#t-tbl2'), cfg2);
   }
   /* chart 3: victims */
   $('#t-card3').hidden = isDiv || !vl;
   if (!isDiv && vl) {
     $('#t-vctl').hidden = vl !== 2;
-    $('#t-h3').textContent = `${o.name}: victim rate${vl === 2 ? ' by age group' : ''}, ${locFull(loc)}`;
-    $('#t-s3').textContent = vl === 2
+    const vAll = $('input[name="t-vsex"]:checked').value === 'p';
+    $('#t-h3').textContent = `${o.name}: ${isN ? 'number of victims' : 'victim rate'}${vl === 2 ? ' by age group' : ''}, ${locFull(loc)}`;
+    $('#t-s3').textContent = isN ? (vl === 2
+      ? `Victims recorded by police${perTxt}. Juvenile victims are aged 0\u201317. A person can be counted more than once, so these are not unique people.${vAll ? '' : ' Victims with sex not stated are counted under all persons only.'}`
+      : `Victims recorded by police${perTxt}. For this offence QPS records the location as the victim, so there is no breakdown by age or sex.`) : vl === 2
       ? `Victims recorded by police per 100,000 people in each age group${mode === 'roll' ? ' per year, rolling 12-month total' : ' per month'}. Juvenile victims are aged 0\u201317. A person can be counted more than once, so these are not unique people.${$('input[name="t-vsex"]:checked').value === 'p' ? '' : ' Male and female rates use same-sex populations; victims with sex not stated are counted under all persons only.'}`
       : `Victims recorded by police per 100,000 population${mode === 'roll' ? ' per year, rolling 12-month total' : ' per month'}. For this offence QPS records the location as the victim, so there is no breakdown by age or sex.`;
-    if (!series3.length) series3.push({name: 'All victims', color: 'var(--s4)', vals: rateSeries(counts(f, id, 'v', loc), pop('v', loc), mode)});
-    const cfg3 = {series: series3, t0, t1: tEnd, mode, aria: `Line chart of victim rates for ${o.name} in ${name}`};
+    if (!series3.length) series3.push({name: 'All victims', color: 'var(--s4)', vals: ser(counts(f, id, 'v', loc), pop('v', loc))});
+    const cfg3 = {series: series3, t0, t1: tEnd, mode, fmt, int: isN, aria: `Line chart of victim ${isN ? 'numbers' : 'rates'} for ${o.name} in ${name}`};
     legend($('#t-leg3'), series3); lineChart($('#t-chart3'), cfg3); dataTable($('#t-tbl3'), cfg3);
   }
 }
@@ -2116,7 +2153,7 @@ async function renderCustody() {
 
 /* ---------- tab introductions ---------- */
 const INTRO = {
-  trends: 'How often crime is reported in Queensland and how that has changed since 2001. Choose a place and a type of crime to see three measures over time: offences reported to police, offenders (adults and young people), and victims. All three are shown per 100,000 people so places of different sizes can be compared. Police count an offender each time they take action over an offence, so one person can be counted more than once.',
+  trends: 'How often crime is reported in Queensland and how that has changed since 2001. Choose a place and a type of crime to see three measures over time: offences reported to police, offenders (adults and young people), and victims. All three are shown per 100,000 people by default so places of different sizes can be compared; switch to numbers to see the counts themselves. Police count an offender each time they take action over an offence, so one person can be counted more than once.',
   changes: 'Which places and types of crime have risen or fallen the most. The latest 12 months are compared with an earlier 12-month period that you choose. Changes are shown as rates per 100,000 people, so population growth is taken into account. Very small numbers are left out because they can swing a lot by chance.',
   map: 'Crime rates across Queensland, by local government area or police division, for the latest 12 months or as a change over time. Use the switch to show area disadvantage (from the 2021 Census) on the map instead. Rates in small, remote communities can look very high because a few offences make a big difference.',
   funnel: 'A check on which places really stand out from the Queensland rate. In places with few people, rates jump around a lot by chance alone. The funnel shows how far a rate can stray from the state rate for that reason. Places outside the funnel are less likely to be explained by chance and are listed below the chart.',
@@ -2180,6 +2217,7 @@ async function init() {
   $$('#v-trends input[type=radio], #v-trends input[type=checkbox]').forEach(i => i.addEventListener('change', renderTrends));
   $$('#v-changes select, #v-changes input').forEach(i => i.addEventListener('change', renderChanges));
   $$('#m-meas, #m-win, #m-show, #m-sidx, input[name="m-geo"], input[name="m-mode"]').forEach(i => i.addEventListener('change', renderMap));
+  $('#home').addEventListener('click', () => { if (state.view === 'trends') window.scrollTo(0, 0); });
   window.addEventListener('hashchange', route);
   let rz; new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(() => { if (state.view === 'trends') renderTrends(); else if (state.view === 'map') drawMap(); else if (state.view === 'funnel') renderFunnel(); else if (state.view === 'mix') renderMix(); else if (state.view === 'victims') renderVictims(); else if (state.view === 'seifa') renderSeifa(); else if (state.view === 'custody') renderCustody(); }, 120); }).observe($('main'));
   const retheme = () => { if (state.view === 'map' && M.ready) renderMap(); };
